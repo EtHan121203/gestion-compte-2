@@ -1,0 +1,9 @@
+.dockerignore
+docker-compose.yaml
+docker-compose.override.yaml
+.env.local
+.env.local.php
+.env.*.local
+var/
+vendor/
+public/bundles/

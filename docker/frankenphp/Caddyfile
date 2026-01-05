@@ -1,0 +1,28 @@
+{
+	frankenphp
+	order php_server before file_server
+}
+
+:80 {
+	log {
+		level INFO
+	}
+
+	# Global options
+	handle {
+		# Compress output
+		encode zstd gzip
+
+		# PHP Server
+		php_server {
+			root public/
+			resolve_root_symlink
+		}
+
+		# Static files
+		file_server {
+			root public/
+			pass_thru
+		}
+	}
+}

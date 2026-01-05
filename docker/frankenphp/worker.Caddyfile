@@ -1,0 +1,8 @@
+{
+	frankenphp {
+		worker {
+			file public/index.php
+			num 4
+		}
+	}
+}
