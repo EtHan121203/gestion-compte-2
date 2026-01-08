@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM dunglas/frankenphp:1-php8.3-alpine AS frankenphp_upstream
+FROM dunglas/frankenphp:1-php8.4-alpine AS frankenphp_upstream
 
 FROM frankenphp_upstream AS frankenphp_base
 
@@ -20,6 +20,8 @@ RUN set -eux; \
     intl \
     opcache \
     zip \
+    gd \
+    pdo_mysql \
     ;
 
 COPY --link docker/frankenphp/conf.d/app.ini $PHP_INI_DIR/conf.d/

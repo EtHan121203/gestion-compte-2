@@ -4,6 +4,7 @@ services:
       context: .
       target: frankenphp_dev
     environment:
+      SERVER_NAME: :80
       APP_SECRET: ${APP_SECRET:-!ChangeMe!}
       DATABASE_URL: mysql://app:gestioncompte@database:3306/app?serverVersion=10.11.2-MariaDB&charset=utf8mb4
       MESSENGER_TRANSPORT_DSN: doctrine://default?auto_setup=0
@@ -11,9 +12,9 @@ services:
       - .:/app
       - /app/var
     ports:
-      - "8000:80"
-      - "443:443"
-      - "443:443/udp"
+      - "8001:80"
+      # - "443:443"
+      # - "443:443/udp"
     tty: true
 
   database:
@@ -26,7 +27,7 @@ services:
     volumes:
       - db-data:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "3307:3306"
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
