@@ -1,0 +1,56 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Recherche numéro d'adhérent - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+{% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+    <i class="material-icons">search</i>&nbsp;Recherche numéro d'adhérent
+{% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="section no-pad-bot" id="index-banner">
+        <div class="container">
+            <h3 class="header center">Recherche numéro d'adhérent</h3>
+            {% if form %}
+                {{ form_start(form) }}
+                {{ form_errors(form) }}
+                    <div class="row center">
+                        <div class="input-field col s6">
+                            {{ form_widget(form.firstname) }}
+                            {{ form_label(form.firstname) }}
+                        </div>
+                    </div>
+                    <div class="row center">
+                        {{ form_widget(form.find, {'attr': {'class': 'btn waves-effect waves-light'}}) }}
+                    </div>
+                {{ form_end(form) }}
+            {% endif %}
+            {% if beneficiaries %}
+                <div class="collection">
+                    {% for beneficiary in beneficiaries %}
+                        <form action="{{ path(return_path, { (routeParam): beneficiary.id } | merge(params)) }}" method="POST" class="collection-item">
+                            <a href="#" onclick="$(this).closest('form').submit()" >{{ beneficiary.publicDisplayNameWithMemberNumber }}{% if beneficiary.membership.lastRegistration %} - {{ beneficiary.membership.lastRegistration.date | date('d F Y') }}{% endif %}</a>
+                        </form>
+                    {% endfor %}
+                </div>
+            {% elseif not form %}
+                <p class=" col s12 light">Oups, aucun résultats pour ce prénom !</p>
+                <br />
+                {% if 'proxy' in return_path %}
+                    <a href="{{ path(return_path, params) }}" class="btn waves-effect waves-light">
+                        <i class="material-icons left">keyboard_return</i>Retourner à la recherche
+                    </a>
+                {% else %}
+                    <a href="{{ path('find_member_number') }}" class="btn">Essayer un autre ?</a>
+                {% endif %}
+            {% endif %}
+            {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+            <div class="row center">
+                <p class=" col s12 light">Déjà un compte ? <a href="{{ path('fos_user_security_login') }}">identifiez-vous</a></p>
+            </div>
+        {% endif %}
+        </div>
+    </div>
+{% endblock %}

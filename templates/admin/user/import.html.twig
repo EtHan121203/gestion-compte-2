@@ -1,0 +1,56 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Importer des adhérents (CSV) - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">file_upload</i>&nbsp;Importer des adhérents (CSV)
+{% endblock %}
+
+{% block content %}
+    <h4>Importer des adhérents au format CSV</h4>
+
+    <div class="row">
+        Colonnes par default :<br>
+        <pre>
+            numero,nom,prénom,adresse,code postal,commune,N/A,téléphone,email,Commissions,A associer à (email),montant
+        </pre>
+
+        <div class="col s8 offset-s2">
+            {{ form_start(form) }}
+            {{ form_errors(form) }}
+            <div class="row">
+                <div class="col s7">
+                    <div class="file-field input-field">
+                        <div class="btn indigo">
+                            <span><i class="material-icons left">insert_drive_file</i>Fichier csv</span>
+                            {{ form_widget(form.submitFile) }}
+                        </div>
+                        <div class="file-path-wrapper">
+                            <input class="file-path validate" type="text">
+                        </div>
+                    </div>
+                </div>
+                <div class="col s5">
+                    {{ form_label(form.delimiter) }}
+                    {{ form_widget(form.delimiter) }}
+                </div>
+                <div class="col s12">
+                    <button type="submit" class="btn"><i class="material-icons left">file_upload</i>Importer</button>
+                </div>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+        <div class="col s12">
+            <p>
+                Pour d'autre format de colonne ou d'autres données (seconde ligne d'adresse, date d'adhésion, mode de réglement,
+                utilisateur ayant enregistré l'adhésion) utiliser l'import en ligne de commande.
+            <pre>
+                php bin/console app:import:users PATH_TO/YOURFILE.csv
+            </pre>
+            </p>
+        </div>
+    </div>
+{% endblock %}

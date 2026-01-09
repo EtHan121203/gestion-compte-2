@@ -1,0 +1,37 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Editer le modèle d'email - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('email_template_list') }}"><i class="material-icons">list</i>&nbsp;Modèles d'emails</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">edit</i>&nbsp;Editer
+{% endblock %}
+
+{% block content %}
+    <h4>Editer le modèle d'email</h4>
+
+    <p>La balise <strong>{{ "{{template_content}}" }}</strong> dans le modèle sera remplacée par le contenu du mail.</p>
+
+    {{ form_start(form) }}
+    <div class="errors">
+        {{ form_errors(form.content) }}
+    </div>
+
+    <div class="row">
+        <div class="input-field col s12">
+            {{ form_label(form.name) }}
+            {{ form_widget(form.name) }}
+        </div>
+        <div class="col s12">
+            {{ form_row(form.description) }}
+        </div>
+    </div>
+
+    {{ form_widget(form.content) }}
+    <div>
+        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
+    </div>
+    {{ form_end(form) }}
+{% endblock %}

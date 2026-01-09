@@ -1,0 +1,37 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+{% if is_granted("ROLE_ADMIN_PANEL") %}
+    <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+{% endif %}
+<a href="{{ path('process_update_list') }}"><i class="material-icons">list</i>Liste des procédures / nouveautés</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">edit</i>Editer
+{% endblock %}
+
+{% block content %}
+    <h4>Editer la procédure / nouveauté</h4>
+
+    {{ form_start(form) }}
+    <div class="errors">
+        {{ form_errors(form.description) }}
+    </div>
+
+    <div class="row">
+        <div class="input-field col s12">
+            {{ form_label(form.title) }}
+            {{ form_widget(form.title) }}
+        </div>
+        <div class="input-field col s12">
+            {{ form_label(form.link) }}
+            {{ form_widget(form.link) }}
+        </div>
+    </div>
+
+    {{ form_widget(form.description) }}
+
+    <div>
+        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
+    </div>
+    {{ form_end(form) }}
+{% endblock %}

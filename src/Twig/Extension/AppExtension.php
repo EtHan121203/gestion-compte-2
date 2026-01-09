@@ -68,6 +68,18 @@ class AppExtension extends AbstractExtension
         );
     }
 
+    public function getFunctions()
+    {
+        return array(
+            new \Twig\TwigFunction('gravatar', array($this, 'gravatar')),
+        );
+    }
+
+    public function gravatar($email, $size = 80)
+    {
+        return 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($email))) . '?s=' . $size;
+    }
+
     public function imgFilter( $entity,$fileField, $filter)
     {
         return $this->basePathPicture->getPicturePath($entity,$fileField, $filter);

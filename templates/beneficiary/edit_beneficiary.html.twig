@@ -1,0 +1,22 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Editer un bénéficiaire - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('user_office_tools') }}"><i class="material-icons">folder_shared</i>&nbsp;Adhésion et ré-adhésion</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('member_show', { 'member_number': beneficiary.membership.memberNumber }) }}"><i class="material-icons">person</i>&nbsp;{{ beneficiary.membership.displayMemberNumber }}</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">edit</i>&nbsp;Editer un bénéficiaire
+{% endblock %}
+
+{% block content %}
+    <h4>Editer un bénéficiaire</h4>
+
+    {{ form_start(edit_form) }}
+    {% include "beneficiary/_partial/beneficiary_form.html.twig" with { form: edit_form } %}
+    <div class="col s3">
+        <input type="submit" class="btn waves-effect" value="Modifier"/>
+    </div>
+    {{ form_end(edit_form) }}
+{% endblock %}

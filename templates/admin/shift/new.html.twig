@@ -1,0 +1,55 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">add</i>&nbsp;Ajouter un créneau ponctuel
+{% endblock %}
+
+{% block content %}
+    <h4 class="">Ajouter un créneau ponctuel</h4>
+    {{ form_start(form) }}
+    <div class="row">
+        <div class="col s12">
+            {{ form_label(form.start.date) }}
+            {{ form_errors(form.start.date) }}
+            {{ form_widget(form.start.date, { attr: { class: 'datepicker' } }) }}
+        </div>
+        <div class="col s12">
+            {{ form_label(form.start.time, 'Heure de début') }}
+            {{ form_errors(form.start.time) }}
+            {{ form_widget(form.start.time, { attr: { class: 'timepicker' } }) }}
+        </div>
+        <div class="col s12">
+            <input type="hidden" id="{{ form.end.date.vars.id }}" name="{{ form.end.date.vars.full_name }}">
+            {{ form_label(form.end.time, 'Heure de fin') }}
+            {{ form_errors(form.end.date) }}
+            {{ form_errors(form.end.time) }}
+            {{ form_widget(form.end.time, { attr: { class: 'timepicker' } }) }}
+        </div>
+        <div class="col s8">
+            {{ form_label(form.formation) }}
+            {{ form_errors(form.formation) }}
+            {{ form_widget(form.formation) }}
+        </div>
+        <div class="col s4">
+            {{ form_label(form.number) }}
+            {{ form_errors(form.number) }}
+            {{ form_widget(form.number) }}
+        </div>
+        <div class="col s12">
+            {{ form_label(form.job) }}
+            {{ form_errors(form.job) }}
+            {{ form_widget(form.job) }}
+        </div>
+    </div>
+    <div>
+        <button type="submit" class="btn waves-effect waves-light">Créer</button>
+    </div>
+    {{ form_row(form._token) }}
+    {{ form_end(form, {'render_rest': false}) }}
+{% endblock %}
+
+{% block javascripts %}
+    {% include "/admin/shift/_form_js.html.twig" %}
+{% endblock %}

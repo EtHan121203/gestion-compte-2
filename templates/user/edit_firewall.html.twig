@@ -1,0 +1,21 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Editer un adhérent - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('user_office_tools') }}"><i class="material-icons">folder_shared</i>&nbsp;Adhésion et ré-adhésion</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">edit</i>&nbsp;Editer une fiche adhérent
+{% endblock %}
+
+{% block content %}
+    <h4>Editer un adhérent</h4>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+    {{ form_end(form) }}
+    <p>
+        Si tu ne connais pas le numéro d'adhérent, <a href="{{ path('find_member_number') }}">clique ici pour le retrouver</a>.
+    </p>
+{% endblock %}

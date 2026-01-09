@@ -1,0 +1,42 @@
+
+{{ form_row(form.member_number) }}
+{% if form.children.withdrawn is defined %}
+    <div class="row">
+        {{ form_errors(form.withdrawn) }}
+        <label>
+            {{ form_widget(form.withdrawn) }}
+            <span>{{ form.withdrawn.vars.label }}</span>
+        </label>
+    </div>
+{% endif %}
+{% if form.children.frozen is defined %}
+    <div class="row">
+        {{ form_errors(form.frozen) }}
+        <label>
+            {{ form_widget(form.frozen) }}
+            <span>{{ form.frozen.vars.label }}</span>
+        </label>
+    </div>
+{% endif %}
+
+{% include "beneficiary/_partial/beneficiary_form.html.twig" with { form: form.mainBeneficiary } %}
+
+{% if form.lastRegistration is defined %}
+    <h4>Première adhésion</h4>
+    <div class="row">
+        <div class="amount col s2">
+            {{ form_row(form.lastRegistration.amount) }}
+        </div>
+        <div class="type col s3">
+            {{ form_row(form.lastRegistration.mode) }}
+        </div>
+        <div class="date col s3">
+            <div class="row">
+                <div class="col s4">{{ form_row(form.lastRegistration.date) }}</div>
+            </div>
+        </div>
+        <div class="col s3">
+            {{ form_row(form.lastRegistration.registrar) }}
+        </div>
+    </div>
+{% endif %}

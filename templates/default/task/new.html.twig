@@ -1,0 +1,30 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <h4 class="">Nouvelle tache</h4>
+
+    {{ form_start(form) }}
+    <div class="input-field">
+        {{ form_widget(form.title) }}
+        {{ form_label(form.title) }}
+    </div>
+    <div class="row">
+        <div class="col s3">
+            {{ form_label(form.commissions) }}
+            {{ form_widget(form.commissions) }}
+        </div>
+        <div class="col s3">
+            {{ form_label(form.due_date) }}
+            {{ form_widget(form.due_date) }}
+        </div>
+        <div class="col s3">
+            {{ form_label(form.priority) }}
+            {{ form_widget(form.priority) }}
+        </div>
+    </div>
+    {{ form_widget(form) }}
+    <div>
+        <button type="submit" class="btn waves-effect waves-light">Créer</button>
+    </div>
+    {{ form_end(form) }}
+{% endblock %}
