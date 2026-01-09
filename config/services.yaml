@@ -14,7 +14,50 @@ parameters:
     swipe_card_logging_anonymous: true
     use_time_log_saving: false
     time_log_saving_shift_free_min_time_in_advance_days: 0
-
+    registration_duration: "1 year"
+    cycle_type: abcd
+    user_account_enabled_icon: ☑
+    member_withdrawn_icon: ∅
+    enable_place_local_ip_address_check: true
+    place_local_ip_address: "127.0.0.1,192.168.0.x"
+    member_frozen_icon: ❄️
+    member_exempted_icon: ☂
+    member_registration_missing_icon: $
+    beneficiary_flying_icon: ✈
+    emails.base_domain: yourcoop.local
+    project_name: "My Local Coop"
+    local_currency_name: "monnaie locale"
+    code_generation_enabled: true
+    due_duration_by_cycle: 180
+    min_shift_duration: 90
+    new_users_start_as_beginner: true
+    allow_extra_shifts: true
+    max_time_in_advance_to_book_extra_shifts: "3 days"
+    forbid_shift_overlap_time: 30
+    fly_and_fixed_allow_fixed_shift_free: false
+    maximum_nb_of_beneficiaries_in_membership: 2
+    emails.contact:
+        { from_name: "Contact Localcoop", address: "contact@yourcoop.local" }
+    emails.member:
+        { from_name: "Membres Localcoop", address: "membres@yourcoop.local" }
+    emails.shift:
+        { from_name: "Créneaux Localcoop", address: "creneaux@yourcoop.local" }
+    emails.formation:
+        {
+            from_name: "Formation Localcoop",
+            address: "formations@yourcoop.local",
+        }
+    emails.admin:
+        { from_name: "Admin Localcoop", address: "admin@yourcoop.local" }
+    emails.noreply:
+        { from_name: "Ne pas répondre", address: "noreply@yourcoop.local" }
+    emails.sendable:
+        - "%emails.contact%"
+        - "%emails.member%"
+        - "%emails.shift%"
+        - "%emails.formation%"
+        - "%emails.admin%"
+        - "%emails.noreply%"
 services:
     # default configuration for services in *this* file
     _defaults:

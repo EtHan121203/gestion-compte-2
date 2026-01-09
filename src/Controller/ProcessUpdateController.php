@@ -1,11 +1,11 @@
 <?php
 
-namespace AppBundle\Controller;
+namespace App\Controller;
 
-use AppBundle\Entity\DynamicContent;
-use AppBundle\Entity\ProcessUpdate;
-use AppBundle\Entity\Shift;
-use AppBundle\Form\ProcessUpdateType;
+use App\Entity\DynamicContent;
+use App\Entity\ProcessUpdate;
+use App\Entity\Shift;
+use App\Form\ProcessUpdateType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -35,7 +35,7 @@ class ProcessUpdateController extends Controller
         //todo paginate
 
         $em = $this->getDoctrine()->getManager();
-        $processUpdates = $em->getRepository('AppBundle:ProcessUpdate')->findBy(array(),array('date'=>'DESC'));
+        $processUpdates = $em->getRepository('App\Entity\ProcessUpdate')->findBy(array(),array('date'=>'DESC'));
 
         $delete_forms = array();
         foreach ($processUpdates as $update){

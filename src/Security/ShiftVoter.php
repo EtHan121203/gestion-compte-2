@@ -1,0 +1,139 @@
+<?php
+// src/AppBundle/Security/ShiftVoter.php
+namespace App\Security;
+
+use App\Entity\Membership;
+use App\Entity\Shift;
+use App\Entity\User;
+use App\Service\ShiftService;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\Voter;
+
+class ShiftVoter extends Voter
+{
+    const BOOK = 'book';
+    const FREE = 'free';
+    const REJECT = 'reject';
+    const ACCEPT = 'accept';
+    const LOCK = 'lock';
+    const VALIDATE = 'validate';
+    private $decisionManager;
+    private $requestStack;
+
+    /**
+     * @var ShiftService
+     */
+    private $shiftService;
+
+    public function __construct(ShiftService $shiftService, AccessDecisionManagerInterface $decisionManager, RequestStack $requestStack)
+    {
+        $this->shiftService = $shiftService;
+        $this->decisionManager = $decisionManager;
+        $this->requestStack = $requestStack;
+    }
+
+    protected function supports(string $attribute, mixed $subject): bool
+    {
+        // if the attribute isn't one we support, return false
+        if (!in_array($attribute, array(self::BOOK, self::REJECT, self::FREE, self::ACCEPT, self::LOCK, self::VALIDATE))) {
+            return false;
+        }
+
+        // only vote on Task objects inside this voter
+        if (!$subject instanceof Shift) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
+    {
+        $user = $token->getUser();
+
+        if (!$user instanceof User) {  // the user must be logged in; if not, deny access
+            if (!in_array($attribute, array(self::REJECT, self::ACCEPT))) //accept and reject can be done without login
+                return false;
+            else
+                $user = null;
+        }
+
+        // ROLE_SUPER_ADMIN can do anything! The power!
+        if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
+            return true;
+        }
+
+        // you know $subject is a Task object, thanks to supports
+        /** @var Task $task */
+        $shift = $subject;
+
+        // you know $subject is a Post object, thanks to supports
+        switch ($attribute) {
+            case self::BOOK:
+                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
+                    return true;
+                }
+                return $this->shiftService->isShiftBookable($shift, $user->getBeneficiary());
+            case self::FREE:
+                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
+                    return true;
+                }
+                return $this->isShifter($shift, $user);
+            case self::LOCK:
+                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
+                    return true;
+                }
+                return false;
+            case self::REJECT:
+                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
+                    return true;
+                }
+                return $this->canReject($shift, $user);
+            case self::ACCEPT:
+                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
+                    return true;
+                }
+                return $this->canAccept($shift, $user);
+            case self::VALIDATE:
+                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
+                    return true;
+                }
+                return false;
+        }
+
+        throw new \LogicException('This code should not be reached!');
+    }
+
+    private function isShifter(Shift $shift, User $user = null)
+    {
+        if ($user instanceof User) {
+            return $user->getBeneficiary() === $shift->getShifter();
+        }
+        return false;
+    }
+
+    private function canReject(Shift $shift, User $user = null)
+    {
+        if ($user instanceof User) {  // the user is logged in
+            return $user->getBeneficiary() === $shift->getLastShifter();
+        } // the user is not logged in
+        $token = $this->requestStack->getCurrentRequest()->get('token');
+        if ($shift->getId()) {
+            if ($shift->getLastShifter()) {
+                if ($token == $shift->getTmpToken($shift->getLastShifter()->getId())) {
+                    return true;
+                }
+            } else {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    private function canAccept(Shift $shift, User $user = null)
+    {
+        return $this->canReject($shift, $user);
+    }
+}

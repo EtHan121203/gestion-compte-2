@@ -1,20 +1,20 @@
 <?php
 
-namespace AppBundle\Controller;
+namespace App\Controller;
 
-use AppBundle\Command\ImportUsersCommand;
-use AppBundle\Entity\AbstractRegistration;
-use AppBundle\Entity\Address;
-use AppBundle\Entity\Beneficiary;
-use AppBundle\Entity\Commission;
-use AppBundle\Entity\HelloassoPayment;
-use AppBundle\Entity\Registration;
-use AppBundle\Entity\Formation;
-use AppBundle\Entity\User;
-use AppBundle\Event\HelloassoEvent;
-use AppBundle\Form\BeneficiaryType;
-use AppBundle\Form\RegistrationType;
-use AppBundle\Service\SearchUserFormHelper;
+use App\Command\ImportUsersCommand;
+use App\Entity\AbstractRegistration;
+use App\Entity\Address;
+use App\Entity\Beneficiary;
+use App\Entity\Commission;
+use App\Entity\HelloassoPayment;
+use App\Entity\Registration;
+use App\Entity\Formation;
+use App\Entity\User;
+use App\Event\HelloassoEvent;
+use App\Form\BeneficiaryType;
+use App\Form\RegistrationType;
+use App\Service\SearchUserFormHelper;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
@@ -93,7 +93,7 @@ class RegistrationsController extends Controller
         if (!($page = $request->get('page')))
             $page = 1;
         $limit = 25;
-        $qb = $em->createQueryBuilder()->from('AppBundle\Entity\AbstractRegistration', 'r')
+        $qb = $em->createQueryBuilder()->from('App\Entity\AbstractRegistration', 'r')
             ->select('count(r.id)')
             ->where('r.date >= :from')
             ->setParameter('from', $from);
@@ -105,7 +105,7 @@ class RegistrationsController extends Controller
             ->getSingleScalarResult();
         $nb_of_pages = intval($max / $limit);
         $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
-        $repository = $em->getRepository('AppBundle:AbstractRegistration');
+        $repository = $em->getRepository('App\Entity\AbstractRegistration');
         $queryb = $repository->createQueryBuilder('r')
             ->where('r.date >= :from')
             ->setParameter('from', $from);
@@ -119,7 +119,7 @@ class RegistrationsController extends Controller
         $registrations = $queryb->getQuery()->getResult();
         $delete_forms = array();
 
-        $table_name = $em->getClassMetadata('AppBundle:AbstractRegistration')->getTableName();
+        $table_name = $em->getClassMetadata('App\Entity\AbstractRegistration')->getTableName();
         $connection = $em->getConnection();
         $statement = $connection->prepare("SELECT date, SUM(sum_1) as sum_1,SUM(sum_2) as sum_2,SUM(sum_3) as sum_3,SUM(sum_4) as sum_4,SUM(sum_5) as sum_5,SUM(sum_6) as sum_6,SUM(grand_total) as grand_total FROM
 (SELECT date_format(date,\"%Y-%m-%d\") as date,

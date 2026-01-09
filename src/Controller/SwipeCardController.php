@@ -1,12 +1,12 @@
 <?php
 
-namespace AppBundle\Controller;
+namespace App\Controller;
 
-use AppBundle\Entity\Beneficiary;
-use AppBundle\Entity\SwipeCard;
-use AppBundle\Entity\User;
-use AppBundle\Security\SwipeCardVoter;
-use AppBundle\Service\SearchUserFormHelper;
+use App\Entity\Beneficiary;
+use App\Entity\SwipeCard;
+use App\Entity\User;
+use App\Security\SwipeCardVoter;
+use App\Service\SearchUserFormHelper;
 use CodeItNow\BarcodeBundle\Utils\BarcodeGenerator;
 use CodeItNow\BarcodeBundle\Utils\QrCode;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -40,12 +40,12 @@ class SwipeCardController extends Controller
      */
     public function swipeInAction(Request $request, $code){
         $session = new Session();
-        $code = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
+        $code = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
         $em = $this->getDoctrine()->getManager();
-        $card = $em->getRepository('AppBundle:SwipeCard')->findLastEnable($code);
+        $card = $em->getRepository('App\Entity\SwipeCard')->findLastEnable($code);
         if (!$card){
             $session->getFlashBag()->add("error","Oups, ce badge n'est pas actif ou n'est pas associé à un compte");
-            $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array("code"=>$code));
+            $card = $em->getRepository('App\Entity\SwipeCard')->findOneBy(array("code"=>$code));
             if ($card && !$card->getEnable() && !$card->getDisabledAt())
                 $session->getFlashBag()->add("warning","Si c'est le tiens, <a href=\"".$this->generateUrl('fos_user_security_login')."\">connecte toi</a> sur ton espace membre pour l'activer");
         }else{
@@ -103,7 +103,7 @@ class SwipeCardController extends Controller
             return new RedirectResponse($referer);
         }
 
-        $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code' => $code));
+        $card = $em->getRepository('App\Entity\SwipeCard')->findOneBy(array('code' => $code));
 
         if ($card) {
             if ($card->getBeneficiary() != $this->getUser()->getBeneficiary()) {
@@ -113,7 +113,7 @@ class SwipeCardController extends Controller
             }
             return new RedirectResponse($referer);
         } else {
-            $lastCard = $em->getRepository('AppBundle:SwipeCard')->findLast($this->getUser()->getBeneficiary());
+            $lastCard = $em->getRepository('App\Entity\SwipeCard')->findLast($this->getUser()->getBeneficiary());
             $card = new SwipeCard();
             $card->setBeneficiary($beneficiary);
             $card->setCode($code);
@@ -141,7 +141,7 @@ class SwipeCardController extends Controller
         $referer = $request->headers->get('referer');
 
         $code = $request->get("code");
-        $code = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
+        $code = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
 
         $em = $this->getDoctrine()->getManager();
         if (!$beneficiary){
@@ -154,7 +154,7 @@ class SwipeCardController extends Controller
         }
 
         /** @var SwipeCard $card */
-        $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code' => $code));
+        $card = $em->getRepository('App\Entity\SwipeCard')->findOneBy(array('code' => $code));
 
         if ($card) {
             $this->denyAccessUnlessGranted(SwipeCardVoter::ENABLE, $card);
@@ -191,11 +191,11 @@ class SwipeCardController extends Controller
         $referer = $request->headers->get('referer');
 
         $code = $request->get("code");
-        $code = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
+        $code = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
 
         $em = $this->getDoctrine()->getManager();
         /** @var SwipeCard $card */
-        $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code'=>$code));
+        $card = $em->getRepository('App\Entity\SwipeCard')->findOneBy(array('code'=>$code));
         if (!$beneficiary){
             $beneficiary = $this->getUser()->getBeneficiary();
         }
@@ -232,11 +232,11 @@ class SwipeCardController extends Controller
         $referer = $request->headers->get('referer');
 
         $code = $request->get("code");
-        $code = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
+        $code = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
 
         $em = $this->getDoctrine()->getManager();
         /** @var SwipeCard $card */
-        $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code'=>$code));
+        $card = $em->getRepository('App\Entity\SwipeCard')->findOneBy(array('code'=>$code));
 
         if ($card){
             if (!$this->get('security.authorization_checker')->isGranted(SwipeCardVoter::DELETE, $card)) {
@@ -288,14 +288,14 @@ class SwipeCardController extends Controller
      */
     public function qrAction(Request $request, $code){
         $code = urldecode($code);
-        $code = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
+        $code = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
         $em = $this->getDoctrine()->getManager();
-        $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code'=>$code));
+        $card = $em->getRepository('App\Entity\SwipeCard')->findOneBy(array('code'=>$code));
         if (!$card){
             throw $this->createAccessDeniedException();
         }
 
-        $url = $this->generateUrl('swipe_in',array('code'=>$this->get('AppBundle\Helper\SwipeCard')->vigenereEncode($card->getCode())),UrlGeneratorInterface::ABSOLUTE_URL);
+        $url = $this->generateUrl('swipe_in',array('code'=>$this->get('App\Helper\SwipeCard')->vigenereEncode($card->getCode())),UrlGeneratorInterface::ABSOLUTE_URL);
         $content = base64_decode($this->_getQr($url));
         $response = new Response();
         $disposition = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_INLINE,'qr.png');
@@ -316,9 +316,9 @@ class SwipeCardController extends Controller
      */
     public function brAction(Request $request, $code){
         $code = urldecode($code);
-        $code = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
+        $code = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
         $em = $this->getDoctrine()->getManager();
-        $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code'=>$code));
+        $card = $em->getRepository('App\Entity\SwipeCard')->findOneBy(array('code'=>$code));
         if (!$card){
             throw $this->createAccessDeniedException();
         }

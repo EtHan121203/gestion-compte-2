@@ -1,10 +1,10 @@
 <?php
 
-namespace AppBundle\Controller;
+namespace App\Controller;
 
 
-use AppBundle\Entity\Task;
-use AppBundle\Form\TaskType;
+use App\Entity\Task;
+use App\Form\TaskType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Form;
@@ -31,7 +31,7 @@ class TaskController extends Controller
         $this->denyAccessUnlessGranted('view', new Task());
 
         $em = $this->getDoctrine()->getManager();
-        $commissions = $em->getRepository('AppBundle:Commission')->findAll();
+        $commissions = $em->getRepository('App\Entity\Commission')->findAll();
         return $this->render('default/task/list.html.twig', array(
             'commissions' => $commissions,
             'task' => new Task(),

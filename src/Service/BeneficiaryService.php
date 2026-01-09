@@ -1,0 +1,113 @@
+<?php
+
+namespace App\Service;
+
+use App\Entity\Beneficiary;
+use App\Entity\Membership;
+use App\Entity\Registration;
+use App\Entity\Shift;
+use App\Entity\ShiftBucket;
+use App\Service\MembershipService;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+
+class BeneficiaryService
+{
+    private $parameterBag;
+    protected $em;
+    private $membershipService;
+
+    public function __construct(ParameterBagInterface $parameterBag, EntityManagerInterface $em, MembershipService $membershipService)
+    {
+        $this->parameterBag = $parameterBag;
+        $this->em = $em;
+        $this->membershipService = $membershipService;
+    }
+
+    /**
+     * Return autocomplete information
+     */
+    public function getAutocompleteBeneficiaries()
+    {
+        $returnArray = array();
+        $beneficiaries = $this->em->getRepository(Beneficiary::class)->findAllActive();
+
+        foreach ($beneficiaries as $beneficiary) {
+            $returnArray[$beneficiary->getDisplayNameWithMemberNumber()] = '';
+        }
+
+        return $returnArray;
+    }
+
+    public function getCycleShiftDurationSum(Beneficiary $beneficiary, $cycle = 0)
+    {
+        $member = $beneficiary->getMembership();
+        $cycle_start = $this->membershipService->getStartOfCycle($member, $cycle);
+        $cycle_end = $this->membershipService->getEndOfCycle($member, $cycle);
+
+        $shifts = $this->em->getRepository(Shift::class)->findShiftsForBeneficiary($beneficiary, $cycle_start, $cycle_end);
+
+        $counter = 0;
+        foreach ($shifts as $shift) {
+            $counter += $shift->getDuration();
+        }
+        return $counter;
+    }
+
+    public function getDisplayNameWithMemberNumberAndStatusIcon(Beneficiary $beneficiary): string
+    {
+        $label = '#' . $beneficiary->getMemberNumber();
+        $label .= ' ' . $this->getStatusIcon($beneficiary);
+        $label .=  ' ' . $beneficiary->getDisplayName();
+        return $label;
+    }
+
+    /**
+     * Return true if the beneficiary is in a "warning" status
+     */
+    public function hasWarningStatus(Beneficiary $beneficiary): bool
+    {
+        $hasWarningStatus = $this->membershipService->hasWarningStatus($beneficiary->getMembership());
+
+        if ($this->container->getParameter('use_fly_and_fixed')) {
+            $hasWarningStatus = $hasWarningStatus || $beneficiary->isFlying();
+        }
+        
+        return $hasWarningStatus;
+    }
+
+    /**
+     * Return a string with emoji between brackets depending on the
+     * beneficiary status, if she/he is inactive (withdrawn), frozen or flying
+     * or an empty string if none of those
+     *
+     * @param bool $includeLeadingSpace if true add a space at the beginning
+     * @return string with ether emoji(s) for the beneficiary's status or empty
+     */
+    public function getStatusIcon(Beneficiary $beneficiary): string
+    {
+        $symbols = array();
+
+        if ($beneficiary->getMembership()->getWithdrawn()) {
+            $symbols[] = $this->container->getParameter('member_withdrawn_icon');
+        }
+        if ($beneficiary->getMembership()->getFrozen()) {
+            $symbols[] = $this->container->getParameter('member_frozen_icon');
+        }
+        if ($beneficiary->isFlying()) {
+            $symbols[] = $this->container->getParameter('beneficiary_flying_icon');;
+        }
+        if ($beneficiary->getMembership()->isCurrentlyExemptedFromShifts()) {
+            $symbols[] = $this->container->getParameter('member_exempted_icon');
+        }
+        if (!$this->membershipService->isUptodate($beneficiary->getMembership())) {
+            $symbols[] = $this->container->getParameter('member_registration_missing_icon');
+        }
+
+        if (count($symbols)) {
+            return '[' . implode("/", $symbols) . ']';
+        }
+        return "";
+    }
+}

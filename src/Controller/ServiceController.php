@@ -1,11 +1,11 @@
 <?php
 
-namespace AppBundle\Controller;
+namespace App\Controller;
 
 
-use AppBundle\Entity\Service;
-use AppBundle\Entity\Task;
-use AppBundle\Form\ServiceType;
+use App\Entity\Service;
+use App\Entity\Task;
+use App\Form\ServiceType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Filesystem\Exception\IOException;
@@ -33,7 +33,7 @@ class ServiceController extends Controller
     public function listAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
-        $services = $em->getRepository('AppBundle:Service')->findAll();
+        $services = $em->getRepository('App\Entity\Service')->findAll();
         return $this->render('admin/service/list.html.twig', array(
             'services' => $services
         ));
@@ -49,7 +49,7 @@ class ServiceController extends Controller
     public function navlistAction()
     {
         $em = $this->getDoctrine()->getManager();
-        $services = $em->getRepository('AppBundle:Service')->findBy(array('public'=>1));
+        $services = $em->getRepository('App\Entity\Service')->findBy(array('public'=>1));
         return $this->render('admin/service/navlist.html.twig', array(
             'services' => $services
         ));

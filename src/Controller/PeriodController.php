@@ -1,15 +1,15 @@
 <?php
 
-namespace AppBundle\Controller;
+namespace App\Controller;
 
-use AppBundle\Entity\Beneficiary;
-use AppBundle\Entity\Job;
-use AppBundle\Entity\Period;
-use AppBundle\Entity\PeriodPosition;
-use AppBundle\Form\AutocompleteBeneficiaryType;
-use AppBundle\Form\PeriodPositionType;
-use AppBundle\Form\PeriodType;
-use AppBundle\Repository\JobRepository;
+use App\Entity\Beneficiary;
+use App\Entity\Job;
+use App\Entity\Period;
+use App\Entity\PeriodPosition;
+use App\Form\AutocompleteBeneficiaryType;
+use App\Form\PeriodPositionType;
+use App\Form\PeriodType;
+use App\Repository\JobRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -67,7 +67,7 @@ class PeriodController extends Controller
             ->setAction($this->generateUrl('period'))
             ->add('job', EntityType::class, array(
                 'label' => 'Type de créneau',
-                'class' => 'AppBundle:Job',
+                'class' => 'App\Entity\Job',
                 'choice_label' => 'name',
                 'multiple' => false,
                 'required' => false,
@@ -159,7 +159,7 @@ class PeriodController extends Controller
                 $findByFilter['job'] = $filter['job'];
             }
 
-            $periodsByDay[$i] = $em->getRepository('AppBundle:Period')
+            $periodsByDay[$i] = $em->getRepository('App\Entity\Period')
                 ->findBy($findByFilter, $order);
         }
 
@@ -192,7 +192,7 @@ class PeriodController extends Controller
                 $findByFilter['job'] = $filter['job'];
             }
 
-            $periodsByDay[$i] = $em->getRepository('AppBundle:Period')
+            $periodsByDay[$i] = $em->getRepository('App\Entity\Period')
                 ->findBy($findByFilter, $order);
         }
 
@@ -472,7 +472,7 @@ class PeriodController extends Controller
             $to = $form->get('day_of_week_to')->getData();
 
             $em = $this->getDoctrine()->getManager();
-            $periods = $em->getRepository('AppBundle:Period')->findBy(array('dayOfWeek'=>$from));
+            $periods = $em->getRepository('App\Entity\Period')->findBy(array('dayOfWeek'=>$from));
 
             $count = 0;
             foreach ($periods as $period){

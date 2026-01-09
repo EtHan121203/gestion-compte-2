@@ -1,11 +1,11 @@
 <?php
 
-namespace AppBundle\Controller;
+namespace App\Controller;
 
 
-use AppBundle\Entity\Membership;
-use AppBundle\Entity\TimeLog;
-use AppBundle\Form\TimeLogType;
+use App\Entity\Membership;
+use App\Entity\TimeLog;
+use App\Form\TimeLogType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,7 +33,7 @@ class TimeLogController extends Controller
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
-        $timeLog = $this->getDoctrine()->getManager()->getRepository('AppBundle:TimeLog')->find($timelog_id);
+        $timeLog = $this->getDoctrine()->getManager()->getRepository('App\Entity\TimeLog')->find($timelog_id);
         if ($timeLog->getMembership() === $member) {
             $em->remove($timeLog);
             $em->flush();
