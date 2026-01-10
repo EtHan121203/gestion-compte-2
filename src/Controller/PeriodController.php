@@ -11,9 +11,9 @@ use App\Form\PeriodPositionType;
 use App\Form\PeriodType;
 use App\Repository\JobRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -24,15 +24,15 @@ use Symfony\Component\HttpFoundation\Request;
 
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
  * Controller to manage the period shift (a.k.a. "semaine type")
- *
- * @Route("period")
  */
-class PeriodController extends Controller
+ #[Route("/period")]
+
+class PeriodController extends AbstractController
 {
     /**
      * Build the filter form for the admin main page (route /booking/admin)
@@ -142,9 +142,11 @@ class PeriodController extends Controller
     /**
      * Display all the period (available and reserved) anonymized
      *
-     * @Route("/", name="period", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER')")
      */
+     #[Route("/", name: "period", methods: ['GET', 'POST'])]
+
+     #[IsGranted('ROLE_USER')]
+
     public function indexAction(Request $request, EntityManagerInterface $em): Response
     {
         $daysOfWeek = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
@@ -175,9 +177,11 @@ class PeriodController extends Controller
     /**
      * Display all the periods in a schedule (available and reserved)
      *
-     * @Route("/admin", name="period_admin", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
+     #[Route("/admin", name: "period_admin", methods: ['GET', 'POST'])]
+
+     #[IsGranted('ROLE_SHIFT_MANAGER')]
+
     public function adminIndexAction(Request $request, EntityManagerInterface $em): Response
     {
         $daysOfWeek = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
@@ -206,10 +210,10 @@ class PeriodController extends Controller
         ));
     }
 
-    /**
-     * @Route("/new", name="period_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     */
+     #[Route("/new", name: "period_new", methods: ['GET', 'POST'])]
+
+     #[IsGranted('ROLE_SHIFT_MANAGER')]
+
     public function newAction(Request $request)
     {
         $session = new Session();
@@ -244,10 +248,10 @@ class PeriodController extends Controller
         ));
     }
 
-    /**
-     * @Route("/{id}/edit", name="period_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     */
+     #[Route("/{id}/edit", name: "period_edit", methods: ['GET', 'POST'])]
+
+     #[IsGranted('ROLE_SHIFT_MANAGER')]
+
     public function editPeriodAction(Request $request, Period $period)
     {
         $session = new Session();
@@ -300,10 +304,10 @@ class PeriodController extends Controller
         ));
     }
 
-    /**
-     * @Route("/{id}/position/add", name="period_position_new", methods={"POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     */
+     #[Route("/{id}/position/add", name: "period_position_new", methods: ['POST'])]
+
+     #[IsGranted('ROLE_SHIFT_MANAGER')]
+
     public function newPeriodPositionAction(Request $request, Period $period)
     {
         $session = new Session();
@@ -333,10 +337,10 @@ class PeriodController extends Controller
         return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
     }
 
-    /**
-     * @Route("/{id}/position/{position}", name="period_position_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_ADMIN')")
-     */
+     #[Route("/{id}/position/{position}", name: "period_position_delete", methods: ['DELETE'])]
+
+     #[IsGranted('ROLE_ADMIN')]
+
     public function deletePeriodPositionAction(Request $request, Period $period, PeriodPosition $position)
     {
         $session = new Session();
@@ -358,9 +362,11 @@ class PeriodController extends Controller
     /**
      * Book a period.
      *
-     * @Route("/{id}/position/{position}/book", name="period_position_book", methods={"POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
+     #[Route("/{id}/position/{position}/book", name: "period_position_book", methods: ['POST'])]
+
+     #[IsGranted('ROLE_SHIFT_MANAGER')]
+
     public function bookPeriodPositionAction(Request $request, Period $period, PeriodPosition $position): Response
     {
         $session = new Session();
@@ -402,9 +408,11 @@ class PeriodController extends Controller
     /**
      * free a position.
      *
-     * @Route("/{id}/position/{position}/free", name="period_position_free", methods={"POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
+     #[Route("/{id}/position/{position}/free", name: "period_position_free", methods: ['POST'])]
+
+     #[IsGranted('ROLE_SHIFT_MANAGER')]
+
     public function freePeriodPositionAction(Request $request, Period $period, PeriodPosition $position)
     {
         $session = new Session();
@@ -421,9 +429,11 @@ class PeriodController extends Controller
     /**
      * Deletes a period entity.
      *
-     * @Route("/{id}", name="period_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_ADMIN')")
      */
+     #[Route("/{id}", name: "period_delete", methods: ['DELETE'])]
+
+     #[IsGranted('ROLE_ADMIN')]
+
     public function deletePeriodAction(Request $request, Period $period)
     {
         $session = new Session();
@@ -445,10 +455,10 @@ class PeriodController extends Controller
 
     }
 
-    /**
-     * @Route("/copyPeriod/", name="period_copy", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
-     */
+     #[Route("/copyPeriod/", name: "period_copy", methods: ['GET', 'POST'])]
+
+     #[IsGranted('ROLE_ADMIN')]
+
     public function copyPeriodAction(Request $request){
         $days = array(
             "Lundi" => 0,
@@ -497,10 +507,10 @@ class PeriodController extends Controller
         ));
     }
 
-    /**
-     * @Route("/generateShifts/", name="shifts_generation", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
-     */
+     #[Route("/generateShifts/", name: "shifts_generation", methods: ['GET', 'POST'])]
+
+     #[IsGranted('ROLE_ADMIN')]
+
     public function generateShiftsForDateAction(Request $request, KernelInterface $kernel){
         $form = $this->createFormBuilder()
             ->setAction($this->generateUrl('shifts_generation'))

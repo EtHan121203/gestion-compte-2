@@ -2,17 +2,19 @@
 
 namespace App\Controller;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 
 use App\Entity\Service;
 use App\Entity\Task;
 use App\Form\ServiceType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\DateTime;
 
@@ -20,19 +22,21 @@ use Symfony\Component\Validator\Constraints\DateTime;
 /**
  * Service controller.
  *
- * @Route("services")
  */
-class ServiceController extends Controller
+ #[Route("/services")]
+
+class ServiceController extends AbstractController
 {
     /**
      * Lists all services.
      *
-     * @Route("/", name="admin_services", methods={"GET"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function listAction(Request $request)
+    #[Route("/", name: "admin_services", methods: ['GET'])]
+
+    #[IsGranted('ROLE_SUPER_ADMIN')]
+
+    public function listAction(Request $request, EntityManagerInterface $em)
     {
-        $em = $this->getDoctrine()->getManager();
         $services = $em->getRepository('App\Entity\Service')->findAll();
         return $this->render('admin/service/list.html.twig', array(
             'services' => $services
@@ -43,12 +47,13 @@ class ServiceController extends Controller
     /**
      * Lists all services.
      *
-     * @Route("/navlist", name="nav_list_services", methods={"GET"})
-     * @Security("has_role('ROLE_USER')")
      */
-    public function navlistAction()
+    #[Route("/navlist", name: "nav_list_services", methods: ['GET'])]
+
+    #[IsGranted('ROLE_USER')]
+
+    EntityManagerInterface pEntityManagerInterface uEntityManagerInterface bEntityManagerInterface lEntityManagerInterface iEntityManagerInterface cEntityManagerInterface  EntityManagerInterface fEntityManagerInterface uEntityManagerInterface nEntityManagerInterface cEntityManagerInterface tEntityManagerInterface iEntityManagerInterface oEntityManagerInterface nEntityManagerInterface  EntityManagerInterface nEntityManagerInterface aEntityManagerInterface vEntityManagerInterface lEntityManagerInterface iEntityManagerInterface sEntityManagerInterface tEntityManagerInterface AEntityManagerInterface cEntityManagerInterface tEntityManagerInterface iEntityManagerInterface oEntityManagerInterface nEntityManagerInterface (EntityManagerInterface $em)EntityManagerInterface 
     {
-        $em = $this->getDoctrine()->getManager();
         $services = $em->getRepository('App\Entity\Service')->findBy(array('public'=>1));
         return $this->render('admin/service/navlist.html.twig', array(
             'services' => $services
@@ -58,16 +63,17 @@ class ServiceController extends Controller
     /**
      * add new services.
      *
-     * @Route("/new", name="service_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function newAction(Request $request)
+    #[Route("/new", name: "service_new", methods: ['GET', 'POST'])]
+
+    #[IsGranted('ROLE_SUPER_ADMIN')]
+
+    public function newAction(Request $request, EntityManagerInterface $em)
     {
         $session = new Session();
 
         $service = new Service();
 
-        $em = $this->getDoctrine()->getManager();
 
         $form = $this->createForm(ServiceType::class, $service);
         $form->handleRequest($request);
@@ -95,14 +101,15 @@ class ServiceController extends Controller
     /**
      * edit service.
      *
-     * @Route("/edit/{id}", name="service_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function editAction(Request $request,Service $service)
+    #[Route("/edit/{id}", name: "service_edit", methods: ['GET', 'POST'])]
+
+    #[IsGranted('ROLE_SUPER_ADMIN')]
+
+    public function editAction(Request $request,Service $service, EntityManagerInterface $em)
     {
         $session = new Session();
 
-        $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(ServiceType::class, $service);
 
         $form->handleRequest($request);
@@ -133,10 +140,12 @@ class ServiceController extends Controller
     /**
      * delete service.
      *
-     * @Route("/{id}", name="service_remove", methods={"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeAction(Request $request,Service $service)
+    #[Route("/{id}", name: "service_remove", methods: ['DELETE'])]
+
+    #[IsGranted('ROLE_SUPER_ADMIN')]
+
+    public function removeAction(Request $request,Service $service, EntityManagerInterface $em)
     {
         $session = new Session();
 
@@ -146,7 +155,6 @@ class ServiceController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $em = $this->getDoctrine()->getManager();
             $em->remove($service);
             $em->flush();
 

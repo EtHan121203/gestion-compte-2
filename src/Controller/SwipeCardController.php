@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 use App\Entity\Beneficiary;
 use App\Entity\SwipeCard;
 use App\Entity\User;
@@ -11,12 +13,12 @@ use CodeItNow\BarcodeBundle\Utils\BarcodeGenerator;
 use CodeItNow\BarcodeBundle\Utils\QrCode;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
@@ -24,9 +26,10 @@ use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 /**
  * User controller.
  *
- * @Route("sw") //keep it short for qr size
  */
-class SwipeCardController extends Controller
+ #[Route("/sw")] //keep it short for qr size
+
+class SwipeCardController extends AbstractController
 {
 
     /**
@@ -36,12 +39,12 @@ class SwipeCardController extends Controller
      * @param String $code
      * @param Request $request
      * @return Response
-     * @Route("/in/{code}", name="swipe_in", methods={"GET"})
      */
-    public function swipeInAction(Request $request, $code){
+    #[Route("/in/{code}", name: "swipe_in", methods: ['GET'])]
+
+    public function swipeInAction(Request $request, $code, EntityManagerInterface $em){
         $session = new Session();
         $code = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
-        $em = $this->getDoctrine()->getManager();
         $card = $em->getRepository('App\Entity\SwipeCard')->findLastEnable($code);
         if (!$card){
             $session->getFlashBag()->add("error","Oups, ce badge n'est pas actif ou n'est pas associé à un compte");
@@ -58,7 +61,7 @@ class SwipeCardController extends Controller
         return $this->redirectToRoute('homepage');
     }
 
-    public function homepageAction(){
+    EntityManagerInterface pEntityManagerInterface uEntityManagerInterface bEntityManagerInterface lEntityManagerInterface iEntityManagerInterface cEntityManagerInterface  EntityManagerInterface fEntityManagerInterface uEntityManagerInterface nEntityManagerInterface cEntityManagerInterface tEntityManagerInterface iEntityManagerInterface oEntityManagerInterface nEntityManagerInterface  EntityManagerInterface hEntityManagerInterface oEntityManagerInterface mEntityManagerInterface eEntityManagerInterface pEntityManagerInterface aEntityManagerInterface gEntityManagerInterface eEntityManagerInterface AEntityManagerInterface cEntityManagerInterface tEntityManagerInterface iEntityManagerInterface oEntityManagerInterface nEntityManagerInterface (EntityManagerInterface $em)EntityManagerInterface {
         return $this->render('user/swipe_card/homepage.html.twig');
     }
 
@@ -68,11 +71,14 @@ class SwipeCardController extends Controller
      * @param Request $request
      * @param Beneficiary $beneficiary
      * @return Response
-     * @Route("/active/", name="active_swipe", methods={"GET","POST"})
-     * @Route("/active/{id}", name="active_swipe_for_beneficiary", methods={"POST"})
-     * @Security("has_role('ROLE_USER')")
      */
-    public function activeSwipeCardAction(Request $request,Beneficiary $beneficiary = null)
+    #[Route("/active/", name: "active_swipe", methods: ['GET', 'POST'])]
+
+    #[Route("/active/{id}", name: "active_swipe_for_beneficiary", methods: ['POST'])]
+
+    #[IsGranted('ROLE_USER')]
+
+    public function activeSwipeCardAction(Request $request,Beneficiary $beneficiary = null, EntityManagerInterface $em)
     {
         $session = new Session();
         $this->denyAccessUnlessGranted(SwipeCardVoter::PAIR, new SwipeCard());
@@ -90,7 +96,6 @@ class SwipeCardController extends Controller
             return new RedirectResponse($referer);
         }
 
-        $em = $this->getDoctrine()->getManager();
         if (!$beneficiary){
             $beneficiary = $this->getUser()->getBeneficiary();
         }
@@ -132,18 +137,20 @@ class SwipeCardController extends Controller
      * @param Request $request
      * @param Beneficiary $beneficiary
      * @return Response
-     * @Route("/enable/", name="enable_swipe")
-     * @Route("/enable/{id}", name="enable_swipe_for_beneficiary", methods={"POST"})
-     * @Security("has_role('ROLE_USER')")
      */
-    public function enableSwipeCardAction(Request $request,Beneficiary $beneficiary = null){
+    #[Route("/enable/", name: "enable_swipe")]
+
+    #[Route("/enable/{id}", name: "enable_swipe_for_beneficiary", methods: ['POST'])]
+
+    #[IsGranted('ROLE_USER')]
+
+    public function enableSwipeCardAction(Request $request,Beneficiary $beneficiary = null, EntityManagerInterface $em){
         $session = new Session();
         $referer = $request->headers->get('referer');
 
         $code = $request->get("code");
         $code = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
 
-        $em = $this->getDoctrine()->getManager();
         if (!$beneficiary){
             $beneficiary = $this->getUser()->getBeneficiary();
         }
@@ -153,114 +160,54 @@ class SwipeCardController extends Controller
             return new RedirectResponse($referer);
         }
 
-        /** @var SwipeCard $card */
-        $card = $em->getRepository('App\Entity\SwipeCard')->findOneBy(array('code' => $code));
-
-        if ($card) {
-            $this->denyAccessUnlessGranted(SwipeCardVoter::ENABLE, $card);
-            if ($card->getBeneficiary() != $beneficiary) {
-                if ($beneficiary === $this->getUser()->getBeneficiary())
-                    $session->getFlashBag()->add('error', 'Ce badge ne t\'appartient pas');
-                else
-                    $session->getFlashBag()->add('error', 'Ce badge n\'appartient pas au beneficiaire');
-            } else {
-                $card->setEnable(true);
-                $card->setDisabledAt(null);
-                $em->persist($card);
-                $em->flush();
-                $session->getFlashBag()->add('success', 'Le badge #' . $card->getNumber() . ' a bien été ré-activé');
-            }
-        } else {
-            $session->getFlashBag()->add('error', 'Aucun badge ne correspond à ce code');
-        }
-        return new RedirectResponse($referer);
-    }
-
     /**
      * disable Swipe Card
      *
      * @param Request $request
      * @param Beneficiary $beneficiary
      * @return Response
-     * @Route("/disable/", name="disable_swipe")
-     * @Route("/disable/{id}", name="disable_swipe_for_beneficiary", methods={"POST"})
-     * @Security("has_role('ROLE_USER')")
      */
-    public function disableSwipeCardAction(Request $request,Beneficiary $beneficiary = null){
+    #[Route("/disable/", name: "disable_swipe")]
+
+    #[Route("/disable/{id}", name: "disable_swipe_for_beneficiary", methods: ['POST'])]
+
+    #[IsGranted('ROLE_USER')]
+
+    public function disableSwipeCardAction(Request $request,Beneficiary $beneficiary = null, EntityManagerInterface $em){
         $session = new Session();
         $referer = $request->headers->get('referer');
 
         $code = $request->get("code");
         $code = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
-
-        $em = $this->getDoctrine()->getManager();
-        /** @var SwipeCard $card */
-        $card = $em->getRepository('App\Entity\SwipeCard')->findOneBy(array('code'=>$code));
-        if (!$beneficiary){
-            $beneficiary = $this->getUser()->getBeneficiary();
-        }
-
-        if ($card){
-            $this->denyAccessUnlessGranted(SwipeCardVoter::DISABLE, $card);
-            if ($card->getBeneficiary() != $beneficiary) {
-                if ($beneficiary === $this->getUser()->getBeneficiary())
-                    $session->getFlashBag()->add('error', 'Ce badge ne t\'appartient pas');
-                else
-                    $session->getFlashBag()->add('error', 'Ce badge n\'appartient pas au beneficiaire');
-            } else {
-                $card->setEnable(false);
-                $em->persist($card);
-                $em->flush();
-                $session->getFlashBag()->add('success','Ce badge est maintenant désactivé');
-            }
-        }else{
-            $session->getFlashBag()->add('error','Aucune badge trouvé');
-        }
-        return new RedirectResponse($referer);
-    }
 
     /**
      * remove Swipe Card
      *
      * @param Request $request
      * @return Response
-     * @Route("/delete/", name="delete_swipe", methods={"POST"})
-     * @Security("has_role('ROLE_ADMIN')")
      */
-    public function deleteAction(Request $request){
+    #[Route("/delete/", name: "delete_swipe", methods: ['POST'])]
+
+    #[IsGranted('ROLE_ADMIN')]
+
+    public function deleteAction(Request $request, EntityManagerInterface $em){
         $session = new Session();
         $referer = $request->headers->get('referer');
 
         $code = $request->get("code");
         $code = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
 
-        $em = $this->getDoctrine()->getManager();
-        /** @var SwipeCard $card */
-        $card = $em->getRepository('App\Entity\SwipeCard')->findOneBy(array('code'=>$code));
-
-        if ($card){
-            if (!$this->get('security.authorization_checker')->isGranted(SwipeCardVoter::DELETE, $card)) {
-                $session->getFlashBag()->add('error','Tu ne peux pas supprimer ce badge');
-                return new RedirectResponse($referer);
-            }
-            $em->remove($card);
-            $em->flush();
-            $session->getFlashBag()->add('success','Le badge '.$code.' a bien été supprimé');
-        }else{
-            $session->getFlashBag()->add('error','Aucune badge trouvé');
-        }
-        return new RedirectResponse($referer);
-    }
-
     /**
      * show Swipe Card
      *
      * @param SwipeCard $card
      * @return Response A Response instance
-     * @Route("/{id}/show", name="swipe_show", methods={"GET"})
-     * @Security("has_role('ROLE_USER_MANAGER')")
      */
-    public function showAction(SwipeCard $card){
+    #[Route("/{id}/show", name: "swipe_show", methods: ['GET'])]
+
+    #[IsGranted('ROLE_USER_MANAGER')]
+
+    public function showAction(SwipeCard $card, EntityManagerInterface $em){
         return $this->render('user/swipe_card.html.twig', [
             'card' => $card
         ]);
@@ -284,12 +231,12 @@ class SwipeCardController extends Controller
      *
      * @param String $code
      * @return Response A Response instance
-     * @Route("/{code}/qr.png", name="swipe_qr", methods={"GET"})
      */
-    public function qrAction(Request $request, $code){
+    #[Route("/{code}/qr.png", name: "swipe_qr", methods: ['GET'])]
+
+    public function qrAction(Request $request, $code, EntityManagerInterface $em){
         $code = urldecode($code);
         $code = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
-        $em = $this->getDoctrine()->getManager();
         $card = $em->getRepository('App\Entity\SwipeCard')->findOneBy(array('code'=>$code));
         if (!$card){
             throw $this->createAccessDeniedException();
@@ -312,12 +259,12 @@ class SwipeCardController extends Controller
      *
      * @param String $code
      * @return Response A Response instance
-     * @Route("/{code}/br.png", name="swipe_br", methods={"GET"})
      */
-    public function brAction(Request $request, $code){
+    #[Route("/{code}/br.png", name: "swipe_br", methods: ['GET'])]
+
+    public function brAction(Request $request, $code, EntityManagerInterface $em){
         $code = urldecode($code);
         $code = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
-        $em = $this->getDoctrine()->getManager();
         $card = $em->getRepository('App\Entity\SwipeCard')->findOneBy(array('code'=>$code));
         if (!$card){
             throw $this->createAccessDeniedException();

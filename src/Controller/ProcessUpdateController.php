@@ -2,39 +2,43 @@
 
 namespace App\Controller;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 use App\Entity\DynamicContent;
 use App\Entity\ProcessUpdate;
 use App\Entity\Shift;
 use App\Form\ProcessUpdateType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Constraints\Date;
 
 /**
  * Process update controller. Correspond to the pages
  * "Gérer les nouveautés" -> Liste des procédures / nouveautés
  *
- * @Route("process/updates")
  */
-class ProcessUpdateController extends Controller
+ #[Route("/process/updates")]
+
+class ProcessUpdateController extends AbstractController
 {
 
     /**
      * Lists all process updates.
      *
-     * @Route("/", name="process_update_list", methods={"GET"})
-     * @Security("has_role('ROLE_USER')")
      */
-    public function listAction(Request $request)
+    #[Route("/", name: "process_update_list", methods: ['GET'])]
+
+    #[IsGranted('ROLE_USER')]
+
+    public function listAction(Request $request, EntityManagerInterface $em)
     {
         //todo paginate
 
-        $em = $this->getDoctrine()->getManager();
         $processUpdates = $em->getRepository('App\Entity\ProcessUpdate')->findBy(array(),array('date'=>'DESC'));
 
         $delete_forms = array();
@@ -63,18 +67,19 @@ class ProcessUpdateController extends Controller
     }
 
     /**
-     * @Route("/count_unread", name="process_update_count_unread", methods={"POST"})
      * @param Request $request
      * @return Response | JsonResponse
      * @throws
-     * @Security("has_role('ROLE_USER')")
      */
-    public function countUnreadAction(Request $request)
+    #[Route("/count_unread", name: "process_update_count_unread", methods: ['POST'])]
+
+    #[IsGranted('ROLE_USER')]
+
+    public function countUnreadAction(Request $request, EntityManagerInterface $em)
     {
         if ($request->isXMLHttpRequest()) {
             $date = trim($request->get('date'));
             $date = \DateTime::createFromFormat(\DateTimeInterface::W3C,$date);
-            $em = $this->getDoctrine()->getManager();
             $nbOfNew = $em->getRepository(ProcessUpdate::class)->countFrom($date);
 
             return new JsonResponse(array('count' => $nbOfNew,'date' => $date->format(\DateTimeInterface::W3C)));
@@ -85,10 +90,12 @@ class ProcessUpdateController extends Controller
     /**
      * Create a process update
      *
-     * @Route("/new", name="process_update_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
-    public function newAction(Request $request)
+    #[Route("/new", name: "process_update_new", methods: ['GET', 'POST'])]
+
+    #[IsGranted('ROLE_PROCESS_MANAGER')]
+
+    public function newAction(Request $request, EntityManagerInterface $em)
     {
         $emailTemplate = new ProcessUpdate();
         $form = $this->createForm(ProcessUpdateType::class, $emailTemplate);
@@ -100,7 +107,6 @@ class ProcessUpdateController extends Controller
             $emailTemplate->setDate(new \DateTime());
             $emailTemplate->setAuthor($this->getUser());
 
-            $em = $this->getDoctrine()->getManager();
             $em->persist($emailTemplate);
             $em->flush();
             $session->getFlashBag()->add('success', "Mise à jour de procédure créée");
@@ -116,10 +122,12 @@ class ProcessUpdateController extends Controller
     /**
      * Edit a process update
      *
-     * @Route("/{id}/edit", name="process_update_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
-    public function editAction(Request $request, ProcessUpdate $processUpdate)
+    #[Route("/{id}/edit", name: "process_update_edit", methods: ['GET', 'POST'])]
+
+    #[IsGranted('ROLE_PROCESS_MANAGER')]
+
+    public function editAction(Request $request, ProcessUpdate $processUpdate, EntityManagerInterface $em)
     {
         $this->denyAccessUnlessGranted('edit', $processUpdate);
 
@@ -128,7 +136,6 @@ class ProcessUpdateController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $session = new Session();
-            $em = $this->getDoctrine()->getManager();
             $em->persist($processUpdate);
             $em->flush();
             $session->getFlashBag()->add('success', 'Mise à jour de procédure éditée');
@@ -159,9 +166,10 @@ class ProcessUpdateController extends Controller
     /**
      * Delete a process update.
      *
-     * @Route("/{id}", name="process_update_delete", methods={"DELETE"})
      */
-    public function deleteAction(Request $request, ProcessUpdate $processUpdate)
+    #[Route("/{id}", name: "process_update_delete", methods: ['DELETE'])]
+
+    public function deleteAction(Request $request, ProcessUpdate $processUpdate, EntityManagerInterface $em)
     {
 
         $this->denyAccessUnlessGranted('delete', $processUpdate);
@@ -171,7 +179,6 @@ class ProcessUpdateController extends Controller
         $session = new Session();
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->remove($processUpdate);
             $em->flush();
             $session->getFlashBag()->add('success', "l'entrée a bien été supprimée");

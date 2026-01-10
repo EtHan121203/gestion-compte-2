@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 use App\Command\ImportUsersCommand;
 use App\Entity\AbstractRegistration;
 use App\Entity\Address;
@@ -34,28 +36,31 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
 use DateTime;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
  * Registrations controller.
  *
- * @Route("registrations")
  */
-class RegistrationsController extends Controller
+ #[Route("/registrations")]
+
+class RegistrationsController extends AbstractController
 {
 
     /**
      * Registrations list
      *
-     * @Route("/", name="registrations", methods={"GET","POST"})
-     * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
-    public function registrationsAction(Request $request)
+    #[Route("/", name: "registrations", methods: ['GET', 'POST'])]
+
+    #[IsGranted('ROLE_FINANCE_MANAGER')]
+
+    public function registrationsAction(Request $request, EntityManagerInterface $em)
     {
         $session = new Session();
 
@@ -89,7 +94,6 @@ class RegistrationsController extends Controller
         }
 
 
-        $em = $this->getDoctrine()->getManager();
         if (!($page = $request->get('page')))
             $page = 1;
         $limit = 25;
@@ -190,16 +194,17 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
     /**
      * edit registration
      *
-     * @Route("/{id}/edit", name="registration_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
-    public function editRegistrationAction(Request $request, Registration $registration)
+    #[Route("/{id}/edit", name: "registration_edit", methods: ['GET', 'POST'])]
+
+    #[IsGranted('ROLE_FINANCE_MANAGER')]
+
+    public function editRegistrationAction(Request $request, Registration $registration, EntityManagerInterface $em)
     {
         $session = new Session();
         $edit_form = $this->createForm(RegistrationType::class, $registration);
         $edit_form->handleRequest($request);
         if ($edit_form->isSubmitted() && $edit_form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->persist($registration);
             $em->flush();
             $session->getFlashBag()->add('success', 'La ligne a bien été éditée !');
@@ -212,10 +217,12 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
     /**
      * remove registration
      *
-     * @Route("/{id}/remove", name="registration_remove", methods={"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeRegistrationAction(Request $request, Registration $registration)
+    #[Route("/{id}/remove", name: "registration_remove", methods: ['DELETE'])]
+
+    #[IsGranted('ROLE_SUPER_ADMIN')]
+
+    public function removeRegistrationAction(Request $request, Registration $registration, EntityManagerInterface $em)
     {
         $session = new Session();
         $form = $this->getRegistrationDeleteForm($registration->getId());
@@ -224,7 +231,6 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
             if ($registration->getMembership() && count($registration->getMembership()->getRegistrations()) === 1 && $registration === $registration->getMembership()->getLastRegistration()) {
                 $session->getFlashBag()->add('error', 'C\'est la seule adhésion de cette adhérent, corrigez là plutôt que de la supprimer');
             } else {
-                $em = $this->getDoctrine()->getManager();
                 if ($registration->getMembership()) {
                     $registration->getMembership()->removeRegistration($registration);
                     $em->persist($registration->getMembership());

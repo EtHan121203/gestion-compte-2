@@ -2,35 +2,38 @@
 
 namespace App\Controller;
 
+use Doctrine\ORM\EntityManagerInterface;
+
 
 use App\Entity\Task;
 use App\Form\TaskType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
  * Task controller.
  *
- * @Route("tasks")
  */
-class TaskController extends Controller
+ #[Route("/tasks")]
+
+class TaskController extends AbstractController
 {
 
     /**
      * Lists all tasks.
      *
-     * @Route("/", name="tasks_list", methods={"GET"})
      */
-    public function listAction(Request $request)
+    #[Route("/", name: "tasks_list", methods: ['GET'])]
+
+    public function listAction(Request $request, EntityManagerInterface $em)
     {
         $this->denyAccessUnlessGranted('view', new Task());
 
-        $em = $this->getDoctrine()->getManager();
         $commissions = $em->getRepository('App\Entity\Commission')->findAll();
         return $this->render('default/task/list.html.twig', array(
             'commissions' => $commissions,
@@ -41,9 +44,10 @@ class TaskController extends Controller
     /**
      * add new task.
      *
-     * @Route("/new", name="task_new", methods={"GET","POST"})
      */
-    public function newAction(Request $request)
+    #[Route("/new", name: "task_new", methods: ['GET', 'POST'])]
+
+    public function newAction(Request $request, EntityManagerInterface $em)
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
@@ -52,7 +56,6 @@ class TaskController extends Controller
 
         $this->denyAccessUnlessGranted('create',$task);
 
-        $em = $this->getDoctrine()->getManager();
 
         $task->setRegistrar($current_app_user);
 
@@ -84,15 +87,15 @@ class TaskController extends Controller
     /**
      * add new task.
      *
-     * @Route("/edit/{id}", name="task_edit", methods={"GET","POST"})
      */
-    public function editAction(Request $request,Task $task)
+    #[Route("/edit/{id}", name: "task_edit", methods: ['GET', 'POST'])]
+
+    public function editAction(Request $request,Task $task, EntityManagerInterface $em)
     {
         $session = new Session();
 
         $this->denyAccessUnlessGranted('edit',$task);
 
-        $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(TaskType::class, $task);
         $form->get('due_date')->setData($task->getDueDate()->format('Y-m-d'));
         $form->get('created_at')->setData($task->getCreatedAt()->format('Y-m-d'));
@@ -132,9 +135,10 @@ class TaskController extends Controller
     /**
      * task delete
      *
-     * @Route("/{id}", name="task_delete", methods={"DELETE"})
      */
-    public function removeAction(Request $request,Task $task)
+    #[Route("/{id}", name: "task_delete", methods: ['DELETE'])]
+
+    public function removeAction(Request $request,Task $task, EntityManagerInterface $em)
     {
         $this->denyAccessUnlessGranted('delete',$task);
         $session = new Session();
@@ -142,7 +146,6 @@ class TaskController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->remove($task);
             $em->flush();
             $session->getFlashBag()->add('success', 'La tache a bien été supprimée !');

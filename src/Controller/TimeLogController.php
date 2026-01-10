@@ -2,38 +2,32 @@
 
 namespace App\Controller;
 
-
 use App\Entity\Membership;
 use App\Entity\TimeLog;
 use App\Form\TimeLogType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Session\Session;
+use App\Service\TimeLogService;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-/**
- * Time Log controller.
- *
- * @Route("time_log")
- */
-class TimeLogController extends Controller
+#[Route('/time_log')]
+class TimeLogController extends AbstractController
 {
-
-    /**
-     * Delete time log
-     *
-     * @Route("/{id}/timelog_delete/{timelog_id}", name="member_timelog_delete", methods={"GET"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
-     * @param Membership $member
-     * @param $timelog_id
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
-     */
-    public function timelogDeleteAction(Membership $member, $timelog_id)
+    #[Route('/{id}/timelog_delete/{timelog_id}', name: 'member_timelog_delete', methods: ['GET'])]
+    #[IsGranted('ROLE_SUPER_ADMIN')]
+    public function timelogDeleteAction(Request , Membership , $timelog_id, EntityManagerInterface $em): RedirectResponse
     {
-        $session = new Session();
-        $em = $this->getDoctrine()->getManager();
-        $timeLog = $this->getDoctrine()->getManager()->getRepository('App\Entity\TimeLog')->find($timelog_id);
+        $session = $request->getSession();
+        $timeLog = $em->getRepository(TimeLog::class)->find($timelog_id);
+
+        if (!$timeLog) {
+            $session->getFlashBag()->add('error', 'Time log introuvable');
+            return $this->redirectToShow($member, $request);
+        }
+
         if ($timeLog->getMembership() === $member) {
             $em->remove($timeLog);
             $em->flush();
@@ -42,20 +36,15 @@ class TimeLogController extends Controller
             $session->getFlashBag()->add('error', $timeLog->getMembership() . '<>' . $member);
             $session->getFlashBag()->add('error', $timeLog->getId());
         }
-        return $this->redirectToShow($member);
+        return $this->redirectToShow($member, $request);
     }
 
-    /**
-     * Create a new log
-     *
-     * @Route("/{id}/new", name="timelog_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @param Membership $member
-     */
-    public function newAction(Request $request, Membership $member)
+    #[Route('/{id}/new', name: 'timelog_new', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_SHIFT_MANAGER')]
+    public function newAction(Request $request, Membership $member, TimeLogService $timeLogService, EntityManagerInterface $em): RedirectResponse
     {
-        $session = new Session();
-        $timeLog = $this->get('time_log_service')->initCustomTimeLog($member);
+        $session = $request->getSession();
+        $timeLog = $timeLogService->initCustomTimeLog($member);
 
         $form = $this->createForm(TimeLogType::class, $timeLog);
         $form->handleRequest($request);
@@ -64,27 +53,30 @@ class TimeLogController extends Controller
             $timeLog->setTime($form->get('time')->getData());
             $timeLog->setDescription($form->get('description')->getData());
 
-            $em = $this->getDoctrine()->getManager();
             $em->persist($timeLog);
             $em->flush();
 
             $session->getFlashBag()->add('success', 'Le log de temps a bien été créé !');
-            return $this->redirectToShow($member);
+            return $this->redirectToShow($member, $request);
         }
 
-        return $this->redirectToShow($member);
+        return $this->redirectToShow($member, $request);
     }
 
-    private function redirectToShow(Membership $member)
+    private function redirectToShow(Membership $member, Request $request): RedirectResponse
     {
-        $securityContext = $this->container->get('security.authorization_checker');
-        if (!$securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+        if (!$this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             return $this->redirectToRoute('homepage');
         }
-        $session = new Session();
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_USER_MANAGER'))
-            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
-        else
-            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getUser()->getUsername())));
+        $session = $request->getSession();
+        if ($this->isGranted('ROLE_USER_MANAGER')) {
+            return $this->redirectToRoute('member_show', ['member_number' => $member->getMemberNumber()]);
+        } else {
+            $username = $this->getUser()->getUserIdentifier();
+            return $this->redirectToRoute('member_show', [
+                'member_number' => $member->getMemberNumber(),
+                'token' => $member->getTmpToken($session->get('token_key') . $username)
+            ]);
+        }
     }
 }
