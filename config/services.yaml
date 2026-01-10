@@ -8,6 +8,9 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     time_after_which_members_are_late_with_shifts: -9
+    registration_period: "15 days ago"
+    remainder_warning_delay: "15"
+    images_tmp_dir: "%kernel.project_dir%/public/tmp"
     registration_every_civil_year: false
     use_fly_and_fixed: false
     swipe_card_logging: true
@@ -26,6 +29,10 @@ parameters:
     beneficiary_flying_icon: ✈
     emails.base_domain: yourcoop.local
     project_name: "My Local Coop"
+    site_name: "Espace membre @ MyLocalCoop"
+    project_url: "https://yourcoop.local/"
+    project_url_display: "yourcoop.local"
+    main_color: "#51CAE9"
     local_currency_name: "monnaie locale"
     code_generation_enabled: true
     due_duration_by_cycle: 180
@@ -36,6 +43,33 @@ parameters:
     forbid_shift_overlap_time: 30
     fly_and_fixed_allow_fixed_shift_free: false
     maximum_nb_of_beneficiaries_in_membership: 2
+    helloasso_registration_campaign_url: "https://www.helloasso.com/associations/my-local-coop/adhesions/re-adhesion"
+    transactional_mailer_user: "contact@yourcoop.local"
+    transactional_mailer_user_name: "espace membre"
+    # icons
+    user_account_not_enabled_material_icon: "person_outline"
+    user_account_enabled_material_icon: "person"
+    member_withdrawn_material_icon: "exit_to_app"
+    member_withdrawn_background_color: "#f44336"
+    member_frozen_material_icon: "ac_unit"
+    member_frozen_background_color: "#2196f3"
+    member_exempted_material_icon: "umbrella"
+    member_exempted_background_color: "#9c27b0"
+    member_registration_missing_material_icon: "warning"
+    member_registration_missing_background_color: "#ff9800"
+    beneficiary_main_icon: "star"
+    beneficiary_new_icon: "new_releases"
+    display_swipe_cards_settings: true
+    display_freeze_account: true
+    display_freeze_account_false_message: "Le gel n'est pas possible actuellement"
+    display_keys_shop: true
+    display_name_shifters: true
+    use_card_reader_to_validate_shifts: true
+    profile_display_task_list: true
+    profile_display_time_log: true
+    display_gauge: true
+    max_nb_of_past_cycles_to_display: 3
+    max_event_proxy_per_member: 1
     emails.contact:
         { from_name: "Contact Localcoop", address: "contact@yourcoop.local" }
     emails.member:
