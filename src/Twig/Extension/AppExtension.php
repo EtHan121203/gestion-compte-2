@@ -8,8 +8,6 @@ use App\Entity\Registration;
 use App\Entity\Shift;
 use App\Entity\SwipeCard;
 use App\Service\Picture\BasePathPicture;
-use CodeItNow\BarcodeBundle\Utils\BarcodeGenerator;
-use CodeItNow\BarcodeBundle\Utils\QrCode;
 use DateInterval;
 use App\Entity\Task;
 use App\Helper\SwipeCard as SwipeCardHelper;
@@ -273,30 +271,11 @@ class AppExtension extends AbstractExtension
     }
 
     public function qr($text) {
-        $qrCode = new QrCode();
-        try {
-            $qrCode
-                ->setText($text)
-                ->setSize(200)
-                ->setPadding(0)
-                ->setErrorCorrection('high')
-                ->setForegroundColor(array('r' => 0, 'g' => 0, 'b' => 0, 'a' => 0))
-                ->setBackgroundColor(array('r' => 255, 'g' => 255, 'b' => 255, 'a' => 0))
-                ->setImageType(QrCode::IMAGE_TYPE_PNG);
-        } catch (\Exception $exception){
-            die($exception);
-        }
-        return '<img src="data:'.$qrCode->getContentType().';base64,'.$qrCode->generate().'" />';
+        return "[QR Code Placeholder pour : $text]";
     }
 
     public function barcode($text){
-        $barcode = new BarcodeGenerator();
-        $barcode->setText($text);
-        $barcode->setType(BarcodeGenerator::Ean13);
-        $barcode->setScale(2);
-        $barcode->setThickness(25);
-        $barcode->setFontSize(10);
-        return '<img src="data:image/png;base64,'.$barcode->generate().'" />';
+        return "[Barcode Placeholder pour : $text]";
     }
 
     public function vigenere_encode($text){
