@@ -18,8 +18,6 @@ use App\Form\BeneficiaryType;
 use App\Form\NoteType;
 use App\Form\UserAdminType;
 use Doctrine\ORM\EntityManagerInterface;
-use FOS\UserBundle\Event\UserEvent;
-use FOS\UserBundle\FOSUserEvents;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -38,6 +36,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Service\MembershipService;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Twig\Sandbox\SecurityError;
 
 /**
@@ -62,7 +61,7 @@ class UserController extends AbstractController
      *
      */
     #[Route('/install_admin', name: 'user_install_admin', methods: ['GET', 'POST'])]
-    public function installAdmin(Request $request, EntityManagerInterface $em, Security $security)
+    public function installAdmin(Request $request, EntityManagerInterface $em, Security $security, UserPasswordHasherInterface $passwordHasher)
     {
         $session = $request->getSession();
         $user = $em->getRepository(User::class)->findByRole('ROLE_SUPER_ADMIN');
@@ -73,6 +72,12 @@ class UserController extends AbstractController
                 $form = $this->createForm(UserAdminType::class, $new_admin);
                 $form->handleRequest($request);
                 if ($form->isSubmitted() && $form->isValid()) {
+                    $new_admin->setPassword(
+                        $passwordHasher->hashPassword(
+                            $new_admin,
+                            $form->get('plainPassword')->getData()
+                        )
+                    );
                     $new_admin->setEnabled(true);
                     $new_admin->addRole('ROLE_ADMIN');
                     $em->persist($new_admin);
@@ -92,8 +97,13 @@ class UserController extends AbstractController
         } else { //main super user not created yet
             $admin = new User();
             $admin->setEmail($this->getParameter('emails.admin')['address']);
-            $admin->setPlainPassword($this->getParameter('super_admin.initial_password'));
-            $admin->setUsername($this->getParameter('super_admin.username'));
+            $admin->setPassword(
+                $passwordHasher->hashPassword(
+                    $admin,
+                    $this->getParameter('super_admin')['initial_password']
+                )
+            );
+            $admin->setUsername($this->getParameter('super_admin')['username']);
             $admin->setEnabled(true);
             $admin->addRole('ROLE_SUPER_ADMIN');
             $em->persist($admin);
@@ -113,40 +123,44 @@ class UserController extends AbstractController
      * @return Response
      */
     #[Route('/change_password', name: 'user_change_password', methods: ['GET', 'POST'])]
-    public function changePassword(Request $request, Security $security, EntityManagerInterface $em, EventDispatcherInterface $dispatcher): Response
+    public function changePassword(Request $request, Security $security, EntityManagerInterface $em, EventDispatcherInterface $dispatcher, UserPasswordHasherInterface $passwordHasher): Response
     {
         if (!$security->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw $this->createAccessDeniedException();
         }
         $formBuilder = $this->createFormBuilder();
-        $formBuilder->add('password',PasswordType::class,array('label'=>'Un mot de passe','trim'=>true));
-        $formBuilder->add('password_repeat',PasswordType::class,array('label'=>'Le même une deuxième fois','trim'=>true));
+        $formBuilder->add('password', PasswordType::class, array('label' => 'Un mot de passe', 'trim' => true));
+        $formBuilder->add('password_repeat', PasswordType::class, array('label' => 'Le même une deuxième fois', 'trim' => true));
         $form = $formBuilder->getForm();
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            if ($data['password'] === $data['password_repeat']) {
+                /** @var User $user */
+                $user = $this->getUser();
+                $user->setPassword(
+                    $passwordHasher->hashPassword(
+                        $user,
+                        $data['password']
+                    )
+                );
+                $user->removeRole('ROLE_PASSWORD_TO_SET');
 
-            if ($form->getData()['password'] === $form->getData()['password_repeat']){
-                $this->getUser()->setPlainPassword($form->getData()['password']);
-
-                $em->persist($this->getUser());
+                $em->persist($user);
                 $em->flush();
-
-                $event = new UserEvent($this->getUser(), $request);
-                $dispatcher->dispatch($event, FOSUserEvents::USER_PASSWORD_CHANGED);
 
                 $session = $request->getSession();
                 $session->getFlashBag()->add('success', 'Mot de passe enregistré, merci !');
 
                 return $this->redirectToRoute('homepage');
-            }else{
+            } else {
                 $session = $request->getSession();
-                $session->getFlashBag()->add('error','Attention : tes deux mots de passe ne sont pas identique !');
+                $session->getFlashBag()->add('error', 'Attention : tes deux mots de passe ne sont pas identique !');
             }
-
         }
 
-        return $this->render('user/change_password.html.twig',array('form'=>$form->createView()));
+        return $this->render('user/change_password.html.twig', array('form' => $form->createView()));
     }
 
     /**

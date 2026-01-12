@@ -18,7 +18,7 @@ class TimeLogController extends AbstractController
 {
     #[Route('/{id}/timelog_delete/{timelog_id}', name: 'member_timelog_delete', methods: ['GET'])]
     #[IsGranted('ROLE_SUPER_ADMIN')]
-    public function timelogDeleteAction(Request , Membership , $timelog_id, EntityManagerInterface $em): RedirectResponse
+    public function timelogDeleteAction(Request $request, Membership $membership, $timelog_id, EntityManagerInterface $em): RedirectResponse
     {
         $session = $request->getSession();
         $timeLog = $em->getRepository(TimeLog::class)->find($timelog_id);

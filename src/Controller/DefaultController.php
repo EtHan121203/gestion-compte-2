@@ -116,7 +116,8 @@ class DefaultController extends AbstractController
         }
 
         $eventsFuture = $em->getRepository(\App\Entity\Event::class)->findFutures();
-        $dynamicContent = $em->getRepository(\App\Entity\DynamicContent::class)->findOneByCode("HOME")->getContent();
+        $dynamicContentEntity = $em->getRepository(\App\Entity\DynamicContent::class)->findOneByCode("HOME");
+        $dynamicContent = $dynamicContentEntity ? $dynamicContentEntity->getContent() : '';
 
         return $this->render('default/index.html.twig', [
             'events' => $eventsFuture,
@@ -159,7 +160,8 @@ class DefaultController extends AbstractController
         $shifts_upcoming = $em->getRepository(Shift::class)->findUpcomingToday();
         $buckets_upcoming = $shiftService->generateShiftBuckets($shifts_upcoming);
 
-        $dynamicContent = $em->getRepository(\App\Entity\DynamicContent::class)->findOneByCode('CARD_READER')->getContent();
+        $dynamicContentEntity = $em->getRepository(\App\Entity\DynamicContent::class)->findOneByCode('CARD_READER');
+        $dynamicContent = $dynamicContentEntity ? $dynamicContentEntity->getContent() : '';
 
         return $this->render('default/card_reader/index.html.twig', [
             "buckets_in_progress" => $buckets_in_progress,

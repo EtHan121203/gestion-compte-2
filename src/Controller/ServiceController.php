@@ -52,7 +52,7 @@ class ServiceController extends AbstractController
 
     #[IsGranted('ROLE_USER')]
 
-    EntityManagerInterface pEntityManagerInterface uEntityManagerInterface bEntityManagerInterface lEntityManagerInterface iEntityManagerInterface cEntityManagerInterface  EntityManagerInterface fEntityManagerInterface uEntityManagerInterface nEntityManagerInterface cEntityManagerInterface tEntityManagerInterface iEntityManagerInterface oEntityManagerInterface nEntityManagerInterface  EntityManagerInterface nEntityManagerInterface aEntityManagerInterface vEntityManagerInterface lEntityManagerInterface iEntityManagerInterface sEntityManagerInterface tEntityManagerInterface AEntityManagerInterface cEntityManagerInterface tEntityManagerInterface iEntityManagerInterface oEntityManagerInterface nEntityManagerInterface (EntityManagerInterface $em)EntityManagerInterface 
+    public function navlist(EntityManagerInterface $em)
     {
         $services = $em->getRepository('App\Entity\Service')->findBy(array('public'=>1));
         return $this->render('admin/service/navlist.html.twig', array(

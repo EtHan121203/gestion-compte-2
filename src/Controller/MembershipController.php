@@ -24,7 +24,7 @@ use App\Form\TimeLogType;
 use App\Security\MembershipVoter;
 use App\Service\MailerService;
 use App\Service\MembershipService;
-use App\Helper\SwipeCardHelper;
+use App\Helper\SwipeCard;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -388,7 +388,13 @@ class MembershipController extends AbstractController
     #[Route('/help_find_user', name: 'find_user_help')]
     public function findUserHelp(): Response
     {
-        return $this->render('default/find_user_number.html.twig');
+        return $this->render('beneficiary/find_member_number.html.twig', [
+            'form' => null,
+            'beneficiaries' => null,
+            'return_path' => null,
+            'routeParam' => null,
+            'params' => null,
+        ]);
     }
 
     #[Route('/find_me', name: 'find_me')]
@@ -401,7 +407,8 @@ class MembershipController extends AbstractController
             ->add('find', SubmitType::class, array('label' => 'Activer mon compte'))
             ->getForm();
 
-        if ($form->handleRequest($request)->isValid()) {
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
             $member_number = $form->get('member_number')->getData();
             $ms = $em->getRepository(Membership::class)->findOneBy(array('member_number' => $member_number));
 
@@ -546,7 +553,7 @@ class MembershipController extends AbstractController
     }
 
     #[Route('/new', name: 'member_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $em, SwipeCardHelper $swipeCard, TokenStorageInterface $tokenStorage, EventDispatcherInterface $eventDispatcher): Response
+    public function new(Request $request, EntityManagerInterface $em, SwipeCard $swipeCard, TokenStorageInterface $tokenStorage, EventDispatcherInterface $eventDispatcher): Response
     {
         $code = $request->query->get('code');
         $a_beneficiary = null;
@@ -700,7 +707,7 @@ class MembershipController extends AbstractController
             $eventDispatcher->dispatch(new BeneficiaryAddEvent($beneficiary), BeneficiaryAddEvent::NAME);
 
             $this->addFlash('success', 'Merci ' . $beneficiary->getFirstname() . ' ! Ton adhésion est maintenant finalisée');
-            return $this->redirectToRoute('fos_user_registration_check_email');
+            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
 
         } elseif ($form->isSubmitted()) {
             foreach ($form->getErrors(true) as $key => $error) {
