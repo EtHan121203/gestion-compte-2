@@ -48,7 +48,7 @@
             {% endif %}
             {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
             <div class="row center">
-                <p class=" col s12 light">Déjà un compte ? <a href="{{ path('fos_user_security_login') }}">identifiez-vous</a></p>
+                <p class=" col s12 light">Déjà un compte ? <a href="{{ path('app_login') }}">identifiez-vous</a></p>
             </div>
         {% endif %}
         </div>
