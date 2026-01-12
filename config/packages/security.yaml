@@ -23,9 +23,7 @@ security:
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
         app_user_provider:
-            entity:
-                class: App\Entity\User
-                property: email
+            id: App\Security\UserProvider
     firewalls:
         dev:
             # Ensure dev tools and static assets are always allowed
@@ -37,7 +35,9 @@ security:
             form_login:
                 login_path: app_login
                 check_path: app_login
-                enable_csrf: true
+                enable_csrf: false
+                username_parameter: _username
+                password_parameter: _password
             logout:
                 path: app_logout
             switch_user: { role: ROLE_ADMIN, parameter: _login_as }
