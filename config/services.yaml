@@ -38,6 +38,9 @@ parameters:
     due_duration_by_cycle: 180
     min_shift_duration: 90
     new_users_start_as_beginner: true
+    super_admin:
+        username: "admin"
+        initial_password: "admin"
     allow_extra_shifts: true
     max_time_in_advance_to_book_extra_shifts: "3 days"
     forbid_shift_overlap_time: 30
@@ -105,3 +108,6 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    App\Service\TimeLogService:
+        arguments:
+            $due_duration_by_cycle: '%due_duration_by_cycle%'
