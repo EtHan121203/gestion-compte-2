@@ -1,0 +1,59 @@
+group:
+    edit:
+        submit: Mettre à jour le groupe
+    show:
+        name: Nom du groupe
+    new:
+        submit: Créer le groupe
+    flash:
+        updated: Le groupe a été mis à jour.
+        created: Le groupe a été créé.
+        deleted: Le groupe a été supprimé.
+security:
+    login:
+        username: Nom utilisateur
+        password: Mot de passe
+        remember_me: Se souvenir de moi
+        submit: Connexion
+profile:
+    show:
+        username: Nom utilisateur
+        email: Adresse e-mail
+    edit:
+        submit: Mettre à jour
+    flash:
+        updated: Le profil a été mis à jour.
+change_password:
+    submit: Modifier le mot de passe
+    flash:
+        success: Le mot de passe a été modifié.
+registration:
+    check_email: Un e-mail a été envoyé. Il contient un lien.
+    confirmed: Félicitations votre compte est maintenant activé.
+    back: Retour
+    submit: Créer un compte
+    flash:
+        user_created: Utilisateur créé avec succès.
+resetting:
+    check_email: Un e-mail a été envoyé.
+    request:
+        username: Nom ou adresse e-mail
+        submit: Réinitialiser le mot de passe
+    reset:
+        submit: Modifier le mot de passe
+    flash:
+        success: Le mot de passe a été réinitialisé avec succès.
+layout:
+    logout: Déconnexion
+    login: Connexion
+    register: Inscription
+    logged_in_as: Connecté en tant que %username%
+form:
+    group_name: Nom du groupe
+    username: Nom utilisateur
+    email: Adresse e-mail
+    current_password: Mot de passe actuel
+    password: Mot de passe
+    password_confirmation: Répéter le mot de passe
+    new_password: Nouveau mot de passe
+    new_password_confirmation: Répéter le nouveau mot de passe
