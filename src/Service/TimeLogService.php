@@ -7,7 +7,7 @@ use App\Entity\Membership;
 use App\Entity\TimeLog;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class TimeLogService
 {
@@ -17,7 +17,7 @@ class TimeLogService
     private $membershipService;
     private $due_duration_by_cycle;
 
-    public function __construct(EntityManagerInterface $em, RequestStack $requestStack, TokenStorage $tokenStorage, MembershipService $membershipService, int $due_duration_by_cycle)
+    public function __construct(EntityManagerInterface $em, RequestStack $requestStack, TokenStorageInterface $tokenStorage, MembershipService $membershipService, int $due_duration_by_cycle)
     {
         $this->em = $em;
         $this->requestStack = $requestStack;
