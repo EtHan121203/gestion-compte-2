@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class BeneficiaryInitializationSubscriber implements EventSubscriberInterface
 {
@@ -17,10 +18,16 @@ class BeneficiaryInitializationSubscriber implements EventSubscriberInterface
      */
     private $em;
 
+    /**
+     * @var UserPasswordHasherInterface
+     */
+    private $passwordHasher;
 
-    public function __construct(EntityManagerInterface $em)
+
+    public function __construct(EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher)
     {
         $this->em = $em;
+        $this->passwordHasher = $passwordHasher;
     }
 
     public static function getSubscribedEvents()
@@ -54,8 +61,16 @@ class BeneficiaryInitializationSubscriber implements EventSubscriberInterface
             }
 
             if (!$beneficiary->getUser()->getPassword()) {
-                $password = User::randomPassword();
-                $beneficiary->getUser()->setPassword($password);
+                $user = $beneficiary->getUser();
+                $randomPassword = User::randomPassword();
+                $user->setPassword(
+                    $this->passwordHasher->hashPassword(
+                        $user,
+                        $randomPassword
+                    )
+                );
+                // We might want to save the plain password somewhere or send it by email
+                // but for now let's at least hash it so login is possible later after reset
             }
         }
     }
