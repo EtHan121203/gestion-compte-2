@@ -140,13 +140,7 @@ class SwipeCard
 
     public function getBarcode(): string
     {
-        $barcode = new BarcodeGenerator();
-        $barcode->setText((string) $this->getCode());
-        $barcode->setType(BarcodeGenerator::Ean13);
-        $barcode->setScale(2);
-        $barcode->setThickness(25);
-        $barcode->setFontSize(10);
-        return $barcode->generate();
+        return "[Barcode Placeholder pour : " . (string)$this->getCode() . "]";
     }
 
     //FROM : \CodeItNow\BarcodeBundle\Generator\CINean13::calculateChecksum
