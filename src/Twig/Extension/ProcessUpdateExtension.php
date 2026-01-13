@@ -37,11 +37,17 @@ class ProcessUpdateExtension extends AbstractExtension
             return $beneficiary->getUser()->getLastLogin();
     }
 
-    public function updates_list_from_date(\DateTime $date) {
+    public function updates_list_from_date(?\DateTime $date) {
+        if ($date === null) {
+            return [];
+        }
         return $this->em->getRepository(ProcessUpdate::class)->findFrom($date);
     }
 
-    public function count_updates_list_from_date(\DateTime $date) {
+    public function count_updates_list_from_date(?\DateTime $date) {
+        if ($date === null) {
+            return 0;
+        }
         return $this->em->getRepository(ProcessUpdate::class)->countFrom($date);
     }
 

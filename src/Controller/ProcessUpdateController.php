@@ -79,7 +79,13 @@ class ProcessUpdateController extends AbstractController
     {
         if ($request->isXMLHttpRequest()) {
             $date = trim($request->get('date'));
-            $date = \DateTime::createFromFormat(\DateTimeInterface::W3C,$date);
+            $date = \DateTime::createFromFormat(\DateTimeInterface::W3C, $date);
+            
+            // Handle case when date parsing fails or date is null
+            if (!$date) {
+                return new JsonResponse(array('count' => 0, 'date' => null));
+            }
+            
             $nbOfNew = $em->getRepository(ProcessUpdate::class)->countFrom($date);
 
             return new JsonResponse(array('count' => $nbOfNew,'date' => $date->format(\DateTimeInterface::W3C)));

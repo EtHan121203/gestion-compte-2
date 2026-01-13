@@ -200,8 +200,11 @@ class AppExtension extends AbstractExtension
     /**
      * exemple output: "2022-06-29T11:32:18+02:00"
      */
-    public function date_w3c(\DateTime $date)
+    public function date_w3c(?\DateTime $date)
     {
+        if ($date === null) {
+            return '';
+        }
         return $date->format( \DateTimeInterface::W3C);
     }
 
