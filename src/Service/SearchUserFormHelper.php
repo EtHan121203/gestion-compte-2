@@ -226,7 +226,7 @@ class SearchUserFormHelper {
                 'label'=>'Hors de la/les commissions(s)'
             ])
             ->add('flying', ChoiceType::class, [
-                'label' => $this->container->getParameter('beneficiary_flying_icon') . ' volant',
+                'label' => $this->parameterBag->get('beneficiary_flying_icon') . ' volant',
                 'required' => false,
                 'choices' => [
                     'Oui' => 2,
@@ -321,7 +321,7 @@ class SearchUserFormHelper {
      * @return QueryBuilder
      */
     public function initSearchQuery($doctrineManager) {
-        $qb = $doctrineManager->getRepository("AppBundle:Membership")->createQueryBuilder('o');
+        $qb = $doctrineManager->getRepository(\App\Entity\Membership::class)->createQueryBuilder('o');
         $qb = $qb->leftJoin("o.beneficiaries", "b")
             ->leftJoin("b.user", "u")
             ->leftJoin("o.registrations", "r")->addSelect("r")
