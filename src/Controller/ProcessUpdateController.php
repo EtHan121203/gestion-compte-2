@@ -54,7 +54,9 @@ class ProcessUpdateController extends AbstractController
             if ($lastShift){
                 $lastShiftDate = $lastShift->getStart();
             }
-            $nbOfNew = $em->getRepository(ProcessUpdate::class)->countFrom($lastShiftDate);
+            if ($lastShiftDate) {
+                $nbOfNew = $em->getRepository(ProcessUpdate::class)->countFrom($lastShiftDate);
+            }
         }
 
 
