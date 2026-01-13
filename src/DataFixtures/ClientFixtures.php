@@ -1,0 +1,40 @@
+<?php
+
+namespace App\DataFixtures;
+
+use App\Entity\Client;
+use App\Entity\Service;
+use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
+use Doctrine\Persistence\ObjectManager;
+
+class ClientFixtures extends Fixture implements OrderedFixtureInterface
+{
+    public function load(ObjectManager $manager): void
+    {
+        $clientCounts = FixturesConstants::CLIENTS_COUNT;
+
+        for ($i = 1; $i <= $clientCounts; $i++) {
+            $client = new Client();
+            $client->setRandomId('client_id_' . $i);
+            $client->setSecret('secret_' . $i);
+            $client->setRedirectUris(['http://example.com/callback_' . $i]);
+            $client->setAllowedGrantTypes(['password', 'refresh_token']);
+
+            $client->setService($this->getReference('service_' . $i, Service::class));
+
+            $this->addReference('client_' . $i, $client);
+
+            $manager->persist($client);
+        }
+
+        $manager->flush();
+
+        echo $clientCounts . " clients created\n";
+    }
+
+    public function getOrder(): int
+    {
+        return 7;
+    }
+}
