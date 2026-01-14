@@ -47,6 +47,9 @@ parameters:
     fly_and_fixed_allow_fixed_shift_free: false
     maximum_nb_of_beneficiaries_in_membership: 2
     helloasso_registration_campaign_url: "https://www.helloasso.com/associations/my-local-coop/adhesions/re-adhesion"
+    helloasso_api_base_url: "https://api.helloasso.com/v3/organizations/my-local-coop/"
+    helloasso_api_key: "your_api_key_here"
+    helloasso_api_password: "your_api_password_here"
     transactional_mailer_user: "contact@yourcoop.local"
     transactional_mailer_user_name: "espace membre"
     # icons

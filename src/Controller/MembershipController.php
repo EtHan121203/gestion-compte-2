@@ -726,8 +726,14 @@ class MembershipController extends AbstractController
     public function join(Request $request, EntityManagerInterface $em, ParameterBagInterface $params, TokenStorageInterface $tokenStorage): Response
     {
         $form = $this->createFormBuilder()
-            ->add('from_text', AutocompleteBeneficiaryType::class, array('label' => 'Adhérent a joindre'))
-            ->add('dest_text', AutocompleteBeneficiaryType::class, array('label' => 'au compte de l\'adhérent'))
+            ->add('from_text', AutocompleteBeneficiaryType::class, array(
+                'label' => 'Adhérent a joindre',
+                'block_prefix' => 'autocomplete_beneficiary_from'
+            ))
+            ->add('dest_text', AutocompleteBeneficiaryType::class, array(
+                'label' => 'au compte de l\'adhérent',
+                'block_prefix' => 'autocomplete_beneficiary_dest'
+            ))
             ->add('join', SubmitType::class, array('label' => 'Joindre les deux comptes', 'attr' => array('class' => 'btn')))
             ->getForm();
         $form->handleRequest($request);

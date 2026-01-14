@@ -35,6 +35,7 @@ class MembershipShiftExemptionController extends AbstractController
             ->add('membership', AutocompleteMembershipType::class, array(
                 'label' => 'Membre',
                 'required' => false,
+                'block_prefix' => 'autocomplete_membership_filter',
             ))
             ->add('shiftExemption', EntityType::class, array(
                 'label' => 'Motif',

@@ -141,8 +141,8 @@ GROUP BY date) as sum GROUP BY date ORDER BY date DESC;");
         if ($to){
             $statement->bindValue('to', $to->format('Y-m-d'));
         }
-        $statement->execute();
-        $results = $statement->fetchAll();
+        $result = $statement->executeQuery();
+        $results = $result->fetchAllAssociative();
 
         $totaux = array();
         foreach ($results as $result){
@@ -164,8 +164,8 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
         if ($to){
             $statement->bindValue('to', $to->format('Y-m-d'));
         }
-        $statement->execute();
-        $grand_total = $statement->fetch();
+        $result = $statement->executeQuery();
+        $grand_total = $result->fetchAssociative();
 
 
         $re = '/1_([0-9]+)$/m';

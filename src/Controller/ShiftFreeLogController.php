@@ -46,6 +46,7 @@ class ShiftFreeLogController extends AbstractController
             ->add('beneficiary', AutocompleteBeneficiaryType::class, [
                 'label' => 'Bénéficiaire',
                 'required' => false,
+                'block_prefix' => 'autocomplete_beneficiary_filter',
             ])
             ->add('fixe', ChoiceType::class, [
                 'label' => 'Type de créneau',
